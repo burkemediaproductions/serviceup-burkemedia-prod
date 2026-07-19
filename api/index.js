@@ -471,6 +471,18 @@ console.log('[auth/login-debug]', {
   adminPasswordConfigured: Boolean(process.env.ADMIN_PASSWORD),
 });
 
+const visibilityDebug = await req.db.query(`
+  select
+    current_database() as database_name,
+    current_user as database_role,
+    current_setting('app.tenant_id', true) as tenant_setting,
+    (select count(*) from public.users) as visible_users,
+    (select count(*) from public.tenant_users) as visible_memberships,
+    (select count(*) from public.tenants) as visible_tenants
+`);
+
+console.log('[auth/visibility-debug]', visibilityDebug.rows[0]);
+
 if (!rows.length) {
   return res.status(401).json({ error: 'Invalid credentials' });
 }
