@@ -461,44 +461,11 @@ app.post('/api/auth/login', async (req, res) => {
         LIMIT 1`,
       [email, req.tenantId],
     );
-console.log('[auth/login-debug]', {
-  tenantId: req.tenantId,
-  userFound: rows.length > 0,
-  submittedEmailMatchesConfigured:
-    String(email).toLowerCase() ===
-    String(process.env.ADMIN_EMAIL || '').toLowerCase(),
-  adminEmailConfigured: Boolean(process.env.ADMIN_EMAIL),
-  adminPasswordConfigured: Boolean(process.env.ADMIN_PASSWORD),
-});
+    if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
 
-const visibilityDebug = await req.db.query(`
-  select
-    current_database() as database_name,
-    current_user as database_role,
-    current_setting('app.tenant_id', true) as tenant_setting,
-    (select count(*) from public.users) as visible_users,
-    (select count(*) from public.tenant_users) as visible_memberships,
-    (select count(*) from public.tenants) as visible_tenants
-`);
-
-console.log('[auth/visibility-debug]', visibilityDebug.rows[0]);
-
-if (!rows.length) {
-  return res.status(401).json({ error: 'Invalid credentials' });
-}
-
-const user = rows[0];
-const match = await bcrypt.compare(password, user.password_hash);
-
-console.log('[auth/password-debug]', {
-  passwordMatchesDatabase: match,
-  submittedPasswordMatchesConfigured:
-    password === process.env.ADMIN_PASSWORD,
-});
-
-if (!match) {
-  return res.status(401).json({ error: 'Invalid credentials' });
-}
+    const user = rows[0];
+    const match = await bcrypt.compare(password, user.password_hash);
+    if (!match) return res.status(401).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign(
       {
