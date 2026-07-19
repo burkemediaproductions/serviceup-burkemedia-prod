@@ -461,11 +461,32 @@ app.post('/api/auth/login', async (req, res) => {
         LIMIT 1`,
       [email, req.tenantId],
     );
-    if (!rows.length) return res.status(401).json({ error: 'Invalid credentials' });
+console.log('[auth/login-debug]', {
+  tenantId: req.tenantId,
+  userFound: rows.length > 0,
+  submittedEmailMatchesConfigured:
+    String(email).toLowerCase() ===
+    String(process.env.ADMIN_EMAIL || '').toLowerCase(),
+  adminEmailConfigured: Boolean(process.env.ADMIN_EMAIL),
+  adminPasswordConfigured: Boolean(process.env.ADMIN_PASSWORD),
+});
 
-    const user = rows[0];
-    const match = await bcrypt.compare(password, user.password_hash);
-    if (!match) return res.status(401).json({ error: 'Invalid credentials' });
+if (!rows.length) {
+  return res.status(401).json({ error: 'Invalid credentials' });
+}
+
+const user = rows[0];
+const match = await bcrypt.compare(password, user.password_hash);
+
+console.log('[auth/password-debug]', {
+  passwordMatchesDatabase: match,
+  submittedPasswordMatchesConfigured:
+    password === process.env.ADMIN_PASSWORD,
+});
+
+if (!match) {
+  return res.status(401).json({ error: 'Invalid credentials' });
+}
 
     const token = jwt.sign(
       {
