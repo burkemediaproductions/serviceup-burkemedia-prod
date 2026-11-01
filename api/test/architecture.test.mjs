@@ -26,6 +26,13 @@ test('administrator seed repairs passwords and links Supabase Auth', () => {
   assert.match(seed, /supabaseAdmin\.auth\.admin\.createUser/);
   assert.match(seed, /supabase_id = coalesce/);
 });
+test('dashboard login synchronizes live auth context before navigation', () => {
+  const loginPage = read('dashboard/src/pages/Login.jsx');
+  const app = read('dashboard/src/App.jsx');
+  assert.match(loginPage, /const \{ login \} = useAuth\(\)/);
+  assert.match(loginPage, /login\(res\.token, res\.user\)/);
+  assert.match(app, /const \{ user, token, loadingAuth \} = useAuth\(\)/);
+});
 test('public Profile explicitly filters private items', () => {
   assert.match(read('api/routes/profile.js'), /item\.is_public !== false/);
 });

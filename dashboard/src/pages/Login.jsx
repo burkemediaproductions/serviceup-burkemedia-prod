@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api';
 // Import your Supabase client
 import { supabase } from '../lib/supabaseClient';
+import { useAuth } from '../context/AuthContext';
 
 /**
  * JWT-based login for the admin UI.
@@ -11,6 +12,7 @@ import { supabase } from '../lib/supabaseClient';
  */
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -25,11 +27,13 @@ export default function LoginPage() {
       if (!res || !res.token) {
         throw new Error('Invalid response from server');
       }
-      // Store JWT and user as before
-      localStorage.setItem('serviceup.jwt', res.token);
-      if (res.user) {
-        localStorage.setItem('serviceup.user', JSON.stringify(res.user));
+      if (!res.user) {
+        throw new Error('Login response is missing the user');
       }
+
+      // Update both React auth state and localStorage before navigating. This
+      // keeps permission-protected routes from seeing a stale null user.
+      login(res.token, res.user);
       if (res.tenant) {
         localStorage.setItem('serviceup.tenant', JSON.stringify(res.tenant));
       }

@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import AdminLayout from './layouts/AdminLayout';
 import { SettingsProvider } from './context/SettingsContext';
 import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/AuthContext';
 
 import Dashboard from './pages/Dashboards';
 import SettingsPage from './pages/Settings';
@@ -37,13 +38,13 @@ import ActivityPage from './pages/Activity';
 
 
 function RequireAuth({ children }) {
-  // Very simple auth gate for now: just check for token in localStorage.
-  const token =
-    typeof window !== 'undefined'
-      ? window.localStorage.getItem('serviceup.jwt')
-      : null;
+  const { user, token, loadingAuth } = useAuth();
 
-  if (!token) {
+  if (loadingAuth) {
+    return <div className="p-6 text-sm text-gray-500">Checking authentication…</div>;
+  }
+
+  if (!token || !user) {
     return <Navigate to="/login" replace />;
   }
   return children;
