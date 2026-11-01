@@ -65,3 +65,12 @@ test('Menus have a tenant-scoped API and persistent migration', () => {
   assert.match(migration, /create table if not exists public\.menus/i);
   assert.match(migration, /create policy tenant_isolation on public\.menus/i);
 });
+test('Menus can be selected, edited, reordered, saved, and deleted', () => {
+  const page = read('dashboard/src/pages/Menus/index.jsx');
+  const route = read('api/routes/menus.js');
+  assert.match(page, /function selectMenu/);
+  assert.match(page, /function moveItem/);
+  assert.match(page, /Save Menu/);
+  assert.match(route, /router\.put\('\/:id'/);
+  assert.match(route, /router\.delete\('\/:id'/);
+});
