@@ -45,9 +45,13 @@ export default function LoginPage() {
         });
         if (sbErr) {
           console.warn('[Login] Supabase sign-in failed', sbErr.message);
+          localStorage.setItem('serviceup.storageAuthError', sbErr.message);
+        } else {
+          localStorage.removeItem('serviceup.storageAuthError');
         }
       } catch (sbErr) {
         console.warn('[Login] Supabase sign-in exception', sbErr);
+        localStorage.setItem('serviceup.storageAuthError', sbErr?.message || 'Storage sign-in failed');
       }
       // Redirect to admin dashboard
       navigate('/admin', { replace: true });

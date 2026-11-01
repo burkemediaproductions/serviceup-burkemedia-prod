@@ -74,3 +74,27 @@ test('Menus can be selected, edited, reordered, saved, and deleted', () => {
   assert.match(route, /router\.put\('\/:id'/);
   assert.match(route, /router\.delete\('\/:id'/);
 });
+test('branding is cached and applied before the dashboard first paint', () => {
+  const context = read('dashboard/src/context/SettingsContext.jsx');
+  const main = read('dashboard/src/main.jsx');
+  const branding = read('dashboard/src/lib/branding.js');
+  assert.match(context, /if \(loading && !settings\) return null/);
+  assert.match(context, /preloadBrandImages\(data\)/);
+  assert.match(main, /applyBranding\(readCachedSettings\(\)\)/);
+  assert.match(branding, /localStorage\.setItem\(cacheKey\(\)/);
+});
+test('navigation settings offer Content Types and saved List Views', () => {
+  const page = read('dashboard/src/pages/Settings/index.jsx');
+  assert.match(page, /contentPageOptions/);
+  assert.match(page, /\/admin\/content\/\$\{slug\}\/view\/\$\{view\.slug\}/);
+  assert.match(page, /pageOptions\.map/);
+});
+test('successful ServiceUp login synchronizes Supabase Storage identity', () => {
+  const app = read('api/index.js');
+  const seed = read('api/seed.js');
+  const login = read('dashboard/src/pages/Login.jsx');
+  assert.match(app, /syncSupabaseStorageIdentity/);
+  assert.match(app, /updateUserById\(supabaseId/);
+  assert.match(seed, /updateUserById\(supabaseId/);
+  assert.match(login, /supabase\.auth\.signInWithPassword/);
+});

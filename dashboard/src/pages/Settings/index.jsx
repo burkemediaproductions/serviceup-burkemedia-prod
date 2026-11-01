@@ -63,6 +63,7 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState('');
   const [roles, setRoles] = useState([]);
+  const [contentPageOptions, setContentPageOptions] = useState([]);
   const [uploading, setUploading] = useState(false);
 
   // Initialize the form from context settings only once.  Additional keys
@@ -110,10 +111,53 @@ export default function SettingsPage() {
     loadRoles();
   }, []);
 
+  // Build easy navigation choices from real Content Types and their saved
+  // List Views, so client sidebars can be assembled without typing routes.
+  useEffect(() => {
+    let cancelled = false;
+    async function loadContentPages() {
+      try {
+        const response = await api.get('/api/content-types');
+        const types = Array.isArray(response) ? response : response?.data || [];
+        const groups = await Promise.all(types.map(async (type) => {
+          const slug = type.slug || type.id;
+          const typeLabel = type.name || type.label || type.slug || 'Content';
+          const options = [{
+            value: `/admin/content/${slug}`,
+            label: `${typeLabel} — Default list`,
+          }];
+          try {
+            const result = await api.get(`/api/content-types/${slug}/list-views?all=true`);
+            const views = Array.isArray(result) ? result : result?.data || result?.views || [];
+            views.forEach((view) => {
+              if (!view?.slug) return;
+              options.push({
+                value: `/admin/content/${slug}/view/${view.slug}`,
+                label: `${typeLabel} — ${view.label || view.slug}`,
+              });
+            });
+          } catch {
+            // The Content Type's default list is still a valid choice.
+          }
+          return options;
+        }));
+        if (!cancelled) setContentPageOptions(groups.flat());
+      } catch (err) {
+        console.error('[Settings] Failed to load Content Type navigation choices', err);
+      }
+    }
+    loadContentPages();
+    return () => { cancelled = true; };
+  }, []);
+
   // Transform roles into options for the multi-select.
   const roleOptions = useMemo(
     () => roles.map((r) => ({ value: r.slug, label: r.label || r.slug })),
     [roles]
+  );
+  const pageOptions = useMemo(
+    () => [...PAGE_OPTIONS, ...contentPageOptions],
+    [contentPageOptions]
   );
 
   // Bind a setting path to an input change handler.  Supports nested paths
@@ -303,6 +347,7 @@ export default function SettingsPage() {
       const payload = {
         ...form,
         theme: {
+          ...(form.theme || {}),
           mode: form.theme?.mode || 'light',
         },
       };
@@ -505,7 +550,7 @@ export default function SettingsPage() {
                       onChange={(e) => updateNavSidebar(i, 'to', e.target.value)}
                     >
                       <option value="">Custom URL…</option>
-                      {PAGE_OPTIONS.map((opt) => (
+                      {pageOptions.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label}
                         </option>
@@ -590,7 +635,7 @@ export default function SettingsPage() {
                                 onChange={(e) => updateSidebarChild(i, ci, 'to', e.target.value)}
                               >
                                 <option value="">Custom URL…</option>
-                                {PAGE_OPTIONS.map((opt) => (
+                                {pageOptions.map((opt) => (
                                   <option key={opt.value} value={opt.value}>
                                     {opt.label}
                                   </option>
@@ -688,7 +733,7 @@ export default function SettingsPage() {
                       onChange={(e) => updateTopbar(i, 'to', e.target.value)}
                     >
                       <option value="">Custom URL…</option>
-                      {PAGE_OPTIONS.map((opt) => (
+                      {pageOptions.map((opt) => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label}
                         </option>
@@ -773,7 +818,7 @@ export default function SettingsPage() {
                                 onChange={(e) => updateTopbarChild(i, ci, 'to', e.target.value)}
                               >
                                 <option value="">Custom URL…</option>
-                                {PAGE_OPTIONS.map((opt) => (
+                                {pageOptions.map((opt) => (
                                   <option key={opt.value} value={opt.value}>
                                     {opt.label}
                                   </option>
