@@ -133,6 +133,7 @@ function pickBestViewBySlug(views, slug) {
 export default function EntryViews() {
   const params = useParams();
   const navigate = useNavigate();
+  const isCreatingView = params.viewSlug === "__new__";
 
   // stages: selecting content type, selecting a view, editing a view
   const [stage, setStage] = useState("types"); // 'types' | 'views' | 'edit'
@@ -355,7 +356,38 @@ export default function EntryViews() {
 
       setViews(normalizedViews);
 
-      if (viewSlugFromRoute) {
+      if (viewSlugFromRoute === "__new__") {
+        const baseLabel = "New editor";
+        let label = baseLabel;
+        let suffix = 1;
+        const existing = normalizedViews.map((v) =>
+          String(v.label || v.slug || "").toLowerCase()
+        );
+        while (existing.includes(label.toLowerCase())) {
+          suffix += 1;
+          label = `${baseLabel} ${suffix}`;
+        }
+
+        setCurrentLabel(label);
+        setAssignedRoles(["ADMIN"]);
+        setDefaultRoles(["ADMIN"]);
+        setAdminOnly(false);
+        setCore(EMPTY_CORE);
+        setSections([
+          {
+            id: "widget-1",
+            title: "Widget 1",
+            description: "",
+            layout: "one-column",
+            fields: [],
+          },
+        ]);
+        setSelectedSectionIndex(0);
+        setActiveViewSlug(slugify(label));
+        setSlugManuallyEdited(false);
+        setStage("edit");
+        setDirty(true);
+      } else if (viewSlugFromRoute) {
         const found = pickBestViewBySlug(normalizedViews, viewSlugFromRoute);
         if (found) {
           loadViewForEdit(found);
@@ -593,38 +625,7 @@ const loadViewForEdit = (view) => {
 
   const handleNewView = () => {
     if (!selectedTypeId) return;
-
-    const baseLabel = "New editor";
-    let label = baseLabel;
-    let suffix = 1;
-    const existing = views.map((v) => (v.label || v.slug || "").toLowerCase());
-    while (existing.includes(label.toLowerCase())) {
-      suffix += 1;
-      label = `${baseLabel} ${suffix}`;
-    }
-    const slug = slugify(label);
-
-    setCurrentLabel(label);
-    setAssignedRoles(["ADMIN"]);
-    setDefaultRoles(["ADMIN"]);
-    setAdminOnly(false);
-    setCore(EMPTY_CORE);
-    setSections([
-      {
-        id: "widget-1",
-        title: "Widget 1",
-        description: "",
-        layout: "one-column",
-        fields: [],
-      },
-    ]);
-    setSelectedSectionIndex(0);
-    setActiveViewSlug(slug);
-    setSlugManuallyEdited(false);
-
-    setStage("edit");
-    setDirty(true);
-    navigate(`/admin/settings/entry-views/${selectedTypeId}/${slug}`);
+    navigate(`/admin/settings/entry-views/${selectedTypeId}/__new__`);
   };
 
   // ---------------------------------------------------------------------------
@@ -711,6 +712,12 @@ setViews(normalizedNewViews);
 
 const newly = pickBestViewBySlug(normalizedNewViews, slug);
 if (newly) loadViewForEdit(newly);
+
+      if (isCreatingView) {
+        navigate(`/admin/settings/entry-views/${selectedTypeId}/${slug}`, {
+          replace: true,
+        });
+      }
 
 
       setDirty(false);
@@ -1058,7 +1065,7 @@ if (newly) loadViewForEdit(newly);
                   
                    setActiveViewSlug(nextSlug);
 
-                   if (!selectedTypeId) return;
+                   if (!selectedTypeId || isCreatingView) return;
                    navigate(`/admin/settings/entry-views/${selectedTypeId}/${nextSlug}`, {
                      replace: true,
                    });

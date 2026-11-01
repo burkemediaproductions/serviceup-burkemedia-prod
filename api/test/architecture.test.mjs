@@ -50,3 +50,18 @@ test('Activity and migration runner are present', () => {
   assert.match(read('db/006_activity_and_tasks.sql'), /activities\.manage/);
   assert.match(read('api/scripts/migrate.mjs'), /serviceup_migrations/);
 });
+test('new Entry Views remain in create mode until first save', () => {
+  const page = read('dashboard/src/pages/Settings/EntryViews.jsx');
+  assert.match(page, /viewSlugFromRoute === "__new__"/);
+  assert.match(page, /entry-views\/\$\{selectedTypeId\}\/__new__/);
+  assert.match(page, /if \(!selectedTypeId \|\| isCreatingView\) return/);
+});
+test('Menus have a tenant-scoped API and persistent migration', () => {
+  const app = read('api/index.js');
+  const page = read('dashboard/src/pages/Menus/index.jsx');
+  const migration = read('db/008_menus.sql');
+  assert.match(app, /app\.use\('\/api\/menus', authMiddleware, menusRouter\)/);
+  assert.match(page, /api\.post\('\/api\/menus'/);
+  assert.match(migration, /create table if not exists public\.menus/i);
+  assert.match(migration, /create policy tenant_isolation on public\.menus/i);
+});

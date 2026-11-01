@@ -4,19 +4,31 @@ import { api } from '../../lib/api';
 export default function MenusPage() {
   const [items, setItems] = useState([]);
   const [label, setLabel] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     api
-      .get('/menus')
+      .get('/api/menus')
       .then((res) => setItems(Array.isArray(res) ? res : res?.data || []))
-      .catch(() => setItems([]));
+      .catch((err) => setError(err.message || 'Failed to load menus'))
+      .finally(() => setLoading(false));
   }, []);
 
   async function add() {
     if (!label.trim()) return;
-    const created = await api.post('/menus', { label });
-    setItems((i) => [...i, created]);
-    setLabel('');
+    try {
+      setSaving(true);
+      setError('');
+      const created = await api.post('/api/menus', { label: label.trim() });
+      setItems((i) => [...i, created]);
+      setLabel('');
+    } catch (err) {
+      setError(err.message || 'Failed to create menu');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -29,11 +41,15 @@ export default function MenusPage() {
             placeholder="Label…"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') add();
+            }}
           />
-          <button className="su-btn primary" onClick={add}>
-            Add
+          <button className="su-btn primary" onClick={add} disabled={saving || !label.trim()}>
+            {saving ? 'Adding…' : 'Add New'}
           </button>
         </div>
+        {error && <p className="su-text-sm" style={{ color: 'var(--su-danger)' }}>{error}</p>}
       </div>
       <div className="su-card">
         <ul>
@@ -48,7 +64,8 @@ export default function MenusPage() {
               {it.label}
             </li>
           ))}
-          {items.length === 0 && <li>No menus yet.</li>}
+          {!loading && items.length === 0 && <li>No menus yet.</li>}
+          {loading && <li>Loading menus…</li>}
         </ul>
       </div>
     </div>

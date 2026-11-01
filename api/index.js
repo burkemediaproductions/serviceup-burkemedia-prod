@@ -18,6 +18,7 @@ import settingsRouter from './routes/settings.js';
 import dashboardRouter from './routes/dashboard.js';
 import contentTypesRouter from './routes/contentTypes.js';
 import entryViewsRouter from './routes/entryViews.js';
+import menusRouter from './routes/menus.js';
 import listViewsRouter from './routes/listViews.js';
 
 import gizmosRouter from './routes/gizmos.js';
@@ -827,6 +828,7 @@ app.use('/api/activities', authMiddleware, activitiesRouter);
 app.use('/api/platform', authMiddleware, platformRouter);
 app.use('/api', entryViewsRouter);
 app.use('/api', listViewsRouter);
+app.use('/api/menus', authMiddleware, menusRouter);
 
 // Gizmos and Gadgets admin routes (not gizmo packs)
 app.use('/api', authMiddleware, gizmosRouter);
