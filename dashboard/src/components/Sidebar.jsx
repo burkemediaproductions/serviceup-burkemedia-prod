@@ -35,6 +35,7 @@ const SidebarLink = ({ to, label, target }) => (
 export default function Sidebar({ onClose, role = "VIEWER", onLogout }) {
   const { settings } = useSettings();
   const location = useLocation();
+  const sidebarLogo = settings?.sidebarLogoUrl || settings?.logoUrl;
 
   // Default nav when settings.navSidebar isn't provided.
   const defaultNav = useMemo(
@@ -144,7 +145,7 @@ export default function Sidebar({ onClose, role = "VIEWER", onLogout }) {
   return (
     <aside className="su-sidebar" aria-label="Main navigation">
       <div className="su-sidebar-brand">
-        {settings?.logoUrl && <img className="su-brand-logo su-brand-logo--sidebar" src={settings.logoUrl} alt={settings?.appName || settings?.app_name || 'ServiceUp'} />}
+        {settings?.showSidebarLogo !== false && sidebarLogo && <img className="su-brand-logo su-brand-logo--sidebar" src={sidebarLogo} alt={settings?.appName || settings?.app_name || 'ServiceUp'} />}
       </div>
       {onClose && (
         <button
@@ -153,7 +154,7 @@ export default function Sidebar({ onClose, role = "VIEWER", onLogout }) {
           onClick={onClose}
           aria-label="Close navigation menu"
         >
-          ✕
+          {settings?.sidebarCloseContent || '✕'}
         </button>
       )}
 

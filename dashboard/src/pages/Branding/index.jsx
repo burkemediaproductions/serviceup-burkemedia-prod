@@ -5,6 +5,9 @@ import { DEFAULT_THEME, normalizeTheme } from '../../lib/branding';
 
 const defaults = {
   app_name: 'ServiceUp', logoUrl: '', faviconUrl: '', appIconUrl: '',
+  topbarLogoUrl: '', sidebarLogoUrl: '', loginLogoUrl: '', loadingImageUrl: '',
+  showTopbarLogo: true, showSidebarLogo: true, showLoginLogo: true, showTopbarTitle: true,
+  sidebarCloseContent: '✕',
   poweredByText: 'Powered by ServiceUp', poweredByUrl: 'https://serviceup.tech',
   customCss: '', theme: DEFAULT_THEME,
 };
@@ -88,6 +91,23 @@ export default function BrandingPage() {
       <h2>Brand</h2>
       <label className="su-label">Dashboard name<input className="su-input" value={form.app_name || ''} onChange={(event) => setForm({ ...form, app_name: event.target.value })} /></label>
       {assetSelect('Primary logo (from Pixels)', form.logoUrl, (value) => setForm({ ...form, logoUrl: value }), images, 'No logo selected')}
+      <p className="su-help">The primary logo is the fallback. Choose different images below when the top bar, sidebar, or login screen need their own treatment.</p>
+      <div className="su-grid cols-3">
+        {assetSelect('Top bar logo', form.topbarLogoUrl, (value) => setForm({ ...form, topbarLogoUrl: value }), images, 'Use primary logo')}
+        {assetSelect('Sidebar logo', form.sidebarLogoUrl, (value) => setForm({ ...form, sidebarLogoUrl: value }), images, 'Use primary logo')}
+        {assetSelect('Login logo', form.loginLogoUrl, (value) => setForm({ ...form, loginLogoUrl: value }), images, 'Use primary logo')}
+      </div>
+      <div className="su-grid cols-2">
+        <label className="su-toggle-field"><input type="checkbox" checked={form.showTopbarLogo !== false} onChange={(event) => setForm({ ...form, showTopbarLogo: event.target.checked })} /><span>Show top bar logo</span></label>
+        <label className="su-toggle-field"><input type="checkbox" checked={form.showTopbarTitle !== false} onChange={(event) => setForm({ ...form, showTopbarTitle: event.target.checked })} /><span>Show top bar title</span></label>
+        <label className="su-toggle-field"><input type="checkbox" checked={form.showSidebarLogo !== false} onChange={(event) => setForm({ ...form, showSidebarLogo: event.target.checked })} /><span>Show sidebar logo</span></label>
+        <label className="su-toggle-field"><input type="checkbox" checked={form.showLoginLogo !== false} onChange={(event) => setForm({ ...form, showLoginLogo: event.target.checked })} /><span>Show login logo</span></label>
+      </div>
+      <div className="su-grid cols-2">
+        {assetSelect('Loading image', form.loadingImageUrl, (value) => setForm({ ...form, loadingImageUrl: value }), images, 'Use default ServiceUp loading mark')}
+        <label className="su-label">Mobile menu close symbol or text<input className="su-input" value={form.sidebarCloseContent || ''} maxLength="16" onChange={(event) => setForm({ ...form, sidebarCloseContent: event.target.value })} placeholder="✕" /></label>
+      </div>
+      <p className="su-help">The loading image is an intentional animated brand mark, not a missing image. Leave it blank for the default ServiceUp mark or select any Pixel.</p>
       {assetSelect('Favicon (from Pixels)', form.faviconUrl, (value) => setForm({ ...form, faviconUrl: value }), images, 'No favicon selected')}
       {assetSelect('App icon (from Pixels)', form.appIconUrl, (value) => setForm({ ...form, appIconUrl: value }), images, 'No app icon selected')}
       <div className="su-grid cols-2">

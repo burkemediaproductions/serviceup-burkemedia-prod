@@ -21,6 +21,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const background = getThemeBackground(settings, themeMode, 'login');
+  const loginLogo = settings?.loginLogoUrl || settings?.logoUrl;
   const backgroundStyle = {
     '--su-page-image': background.imageUrl
       ? `url("${String(background.imageUrl).replace(/"/g, '%22')}")`
@@ -97,7 +98,7 @@ export default function LoginPage() {
           boxShadow: '0 18px 45px rgba(15,23,42,0.45)',
         }}
       >
-        {settings?.logoUrl && <img className="su-brand-logo su-brand-logo--login" src={settings.logoUrl} alt={settings?.appName || settings?.app_name || 'ServiceUp'} />}
+        {settings?.showLoginLogo !== false && loginLogo && <img className="su-brand-logo su-brand-logo--login" src={loginLogo} alt={settings?.appName || settings?.app_name || 'ServiceUp'} />}
         <h1 style={{ marginTop: 0, marginBottom: 8 }}>{settings?.appName || settings?.app_name || 'ServiceUp'} Login</h1>
         <p style={{ marginTop: 0, opacity: 0.8, fontSize: 14 }}>
           Sign in to manage your clients, content, dashboard, and more.

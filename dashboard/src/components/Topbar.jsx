@@ -22,6 +22,7 @@ export default function Topbar({ onToggleSidebar, isSidebarOpen, role = 'VIEWER'
   const items = Array.isArray(settings?.navTopbarButtons)
     ? settings.navTopbarButtons
     : [];
+  const topbarLogo = settings?.topbarLogoUrl || settings?.logoUrl;
 
   const handleToggle = (index) => {
     setOpenIndex((prev) => (prev === index ? null : index));
@@ -45,8 +46,8 @@ export default function Topbar({ onToggleSidebar, isSidebarOpen, role = 'VIEWER'
           </button>
         )}
         <div className="su-topbar-title">
-          {settings?.logoUrl && <img className="su-brand-logo su-brand-logo--topbar" src={settings.logoUrl} alt="" />}
-          {settings?.appName || settings?.app_name || 'ServiceUp Admin'}
+          {settings?.showTopbarLogo !== false && topbarLogo && <img className="su-brand-logo su-brand-logo--topbar" src={topbarLogo} alt="" />}
+          {settings?.showTopbarTitle !== false && <span>{settings?.appName || settings?.app_name || 'ServiceUp Admin'}</span>}
         </div>
       </div>
       <nav className="su-topbar-nav" aria-label="Top navigation">

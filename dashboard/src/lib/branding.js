@@ -95,7 +95,8 @@ export function cacheSettings(settings) {
 export async function preloadBrandImages(settings) {
   if (!settings || typeof Image === 'undefined') return;
   const theme = normalizeTheme(settings.theme);
-  const urls = [settings.logoUrl, settings.faviconUrl, settings.appIconUrl,
+  const urls = [settings.logoUrl, settings.topbarLogoUrl, settings.sidebarLogoUrl,
+    settings.loginLogoUrl, settings.loadingImageUrl, settings.faviconUrl, settings.appIconUrl,
     theme.light.backgroundImageUrl, theme.dark.backgroundImageUrl,
     theme.light.loginBackgroundImageUrl, theme.dark.loginBackgroundImageUrl].filter(Boolean);
   await Promise.all(urls.map((url) => new Promise((resolve) => {

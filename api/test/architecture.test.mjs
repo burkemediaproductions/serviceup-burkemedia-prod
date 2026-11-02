@@ -106,6 +106,9 @@ test('dashboard polish includes branded chrome, reorderable navigation, and stab
   assert.match(read('dashboard/src/components/Topbar.jsx'), /su-brand-logo--topbar/);
   assert.match(read('dashboard/src/components/Sidebar.jsx'), /su-brand-logo--sidebar/);
   assert.match(read('dashboard/src/pages/Login.jsx'), /su-brand-logo--login/);
+  assert.match(read('dashboard/src/components/Topbar.jsx'), /topbarLogoUrl/);
+  assert.match(read('dashboard/src/components/Sidebar.jsx'), /sidebarLogoUrl/);
+  assert.match(read('dashboard/src/components/LoadingPanel.jsx'), /su-loading-mark-ring/);
   assert.match(settings, /moveSidebarItem/);
   assert.match(settings, /moveTopbarItem/);
   assert.match(settings, /showEntryViewSwitcher/);
@@ -114,9 +117,11 @@ test('dashboard polish includes branded chrome, reorderable navigation, and stab
   assert.match(editor, /Loading editor/);
   assert.doesNotMatch(editor, /Powered by QuickBuilder/);
   assert.match(list, /listViews\.length > 1/);
-  assert.match(list, /su-loading-panel/);
+  assert.match(list, /<LoadingPanel label="Loading entries…"/);
   assert.match(read('dashboard/src/pages/Settings/EntryViews.jsx'), /Toggle preview/);
   assert.match(editor, /coreCfg\.layout !== "toggle" \|\| previewOpen/);
+  assert.match(editor, /su-entry-json/);
+  assert.match(settings, /Branding & Appearance/);
 });
 test('navigation settings offer Content Types and saved List Views', () => {
   const page = read('dashboard/src/pages/Settings/index.jsx');

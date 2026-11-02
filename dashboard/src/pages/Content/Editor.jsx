@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../../lib/api";
 import FieldInput, { PanelsPreview } from "../../components/FieldInput";
+import LoadingPanel from "../../components/LoadingPanel";
 import RichTextContent, { isRichTextDocument } from "../../components/RichTextContent";
 import { useSettings } from "../../context/SettingsContext";
 
@@ -908,7 +909,7 @@ export default function Editor() {
   const hideJson = !!settings?.hideJsonByRole?.[roleUpper];
 
   if (overallLoading) {
-    return <div className="su-page"><div className="su-card su-loading-panel" role="status"><div className="su-loading-spinner" /><span>Loading editor…</span></div></div>;
+    return <LoadingPanel label="Loading editor…" />;
   }
 
   // ---------------------------------------------------------------------------
@@ -1193,26 +1194,12 @@ export default function Editor() {
             </div>
           </div>
 
-          {!hideJson && <>
-            <h3 style={{ marginTop: 0, marginBottom: 8, fontSize: 14 }}>
-              Raw JSON (<code>entries.data</code>)
-            </h3>
-            <pre
-            style={{
-              fontSize: 11,
-              background: "#0b1120",
-              color: "#d1fae5",
-              borderRadius: 10,
-              padding: 10,
-              maxHeight: 480,
-              overflow: "auto",
-              fontFamily:
-                'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-            }}
-            >
-              {JSON.stringify(previewData, null, 2)}
-            </pre>
-          </>}
+        </div>
+      )}
+      {!hideJson && (
+        <div className="su-card su-entry-json">
+          <h2 style={{ marginTop: 0, marginBottom: 8, fontSize: 16 }}>Entry JSON</h2>
+          <pre className="su-code-block">{JSON.stringify(previewData, null, 2)}</pre>
         </div>
       )}
     </div>

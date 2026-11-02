@@ -30,6 +30,7 @@ const PAGE_OPTIONS = [
   { value: '/admin/users', label: 'Users' },
   { value: '/admin/taxonomies', label: 'Taxonomies' },
   { value: '/admin/menus', label: 'Menus' },
+  { value: '/admin/branding', label: 'Branding & Appearance' },
   { value: '/admin/headers', label: 'Headers' },
   { value: '/admin/footers', label: 'Footers' },
   // Quick Builder sits at the root of the admin; include it for easy selection.
@@ -947,7 +948,7 @@ export default function SettingsPage() {
           </div>
         </section>
       </div>
-      <div>
+      <div className="su-settings-save-row">
         <button
           className="su-btn primary"
           onClick={save}
@@ -956,7 +957,7 @@ export default function SettingsPage() {
           {saving ? 'Saving…' : uploading ? 'Uploading…' : 'Save settings'}
         </button>
         {savedMsg && (
-          <span className="ml-3 text-sm text-gray-600">{savedMsg}</span>
+          <span className="su-settings-save-message">{savedMsg}</span>
         )}
       </div>
     </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../../lib/api';
 import { useSettings } from '../../context/SettingsContext';
+import LoadingPanel from '../../components/LoadingPanel';
 import { useAuth } from '../../context/AuthContext';
 
 // ✅ NEW: list/widget display helper (handles repeaters, nested repeaters, etc.)
@@ -611,7 +612,7 @@ export default function TypeList() {
   // Render
   // ---------------------------------------------------------------------------
   if (loading) {
-    return <div className="su-page"><div className="su-card su-loading-panel" role="status"><div className="su-loading-spinner" /><span>Loading entries…</span></div></div>;
+    return <LoadingPanel label="Loading entries…" />;
   }
 
   return (
