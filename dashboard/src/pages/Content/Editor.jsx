@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../../lib/api";
-import FieldInput from "../../components/FieldInput";
+import FieldInput, { PanelsPreview } from "../../components/FieldInput";
 import RichTextContent, { isRichTextDocument } from "../../components/RichTextContent";
 import { useSettings } from "../../context/SettingsContext";
 
@@ -1173,7 +1173,9 @@ export default function Editor() {
                 >
                   <div style={{ opacity: 0.7 }}>{k}</div>
                   <div className="su-preview-value">
-                    {isRichTextDocument(v) ? <RichTextContent value={v} /> : prettyValueForField(k, v)}
+                    {String(fieldDefByKey[k]?.type || "").toLowerCase() === "panels"
+                      ? <PanelsPreview field={fieldDefByKey[k]} value={v} />
+                      : isRichTextDocument(v) ? <RichTextContent value={v} /> : prettyValueForField(k, v)}
                   </div>
                 </div>
               ))}

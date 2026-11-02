@@ -98,3 +98,13 @@ test('successful ServiceUp login synchronizes Supabase Storage identity', () => 
   assert.match(seed, /updateUserById\(supabaseId/);
   assert.match(login, /supabase\.auth\.signInWithPassword/);
 });
+test('Panels provide template-aware page composition without frontend Widgets', () => {
+  const input = read('dashboard/src/components/FieldInput.jsx');
+  const builder = read('dashboard/src/pages/ContentTypes/QuickBuilder.jsx');
+  const website = JSON.parse(read('api/gizmo-packs/website-basic.json'));
+  assert.match(input, /function PanelsField/);
+  assert.match(input, /Page template/);
+  assert.match(builder, /Panels \(page sections\)/);
+  const pageType = website.content_types.find((item) => item.slug === 'page');
+  assert.equal(pageType.fields.some((field) => field.type === 'panels'), true);
+});

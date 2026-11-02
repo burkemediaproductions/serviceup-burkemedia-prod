@@ -208,6 +208,33 @@ button {
   .su-entry-core-row { grid-template-columns: 1fr; }
 }
 
+/* Panels: typed, template-aware website sections */
+.su-panels-editor { display: grid; gap: 14px; min-width: 0; }
+.su-panels-template { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--su-border); border-radius: 10px; background: color-mix(in srgb, var(--su-surface) 94%, var(--su-primary)); }
+.su-panels-template > span { font-size: 13px; font-weight: 700; }
+.su-panels-template small, .su-panel-field small { opacity: .7; }
+.su-panels-list { display: grid; gap: 12px; }
+.su-panel-card { min-width: 0; border: 1px solid var(--su-border); border-radius: 12px; overflow: hidden; background: var(--su-surface); }
+.su-panel-card-header { display: flex; gap: 10px; justify-content: space-between; align-items: center; padding: 10px 12px; background: color-mix(in srgb, var(--su-surface) 92%, var(--su-primary)); }
+.su-panel-title { display: flex; align-items: center; gap: 8px; min-width: 0; border: 0; background: transparent; color: inherit; font: inherit; font-weight: 700; cursor: pointer; text-align: left; }
+.su-panel-number { display: inline-grid; place-items: center; width: 24px; height: 24px; flex: 0 0 auto; border-radius: 999px; color: #fff; background: var(--su-primary); font-size: 12px; }
+.su-panel-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.su-panel-actions .su-btn { padding: 5px 8px; }
+.su-panel-card-body { display: grid; gap: 14px; padding: 14px; }
+.su-panel-field { display: grid; gap: 6px; min-width: 0; }
+.su-panel-field > label { font-size: 13px; font-weight: 650; }
+.su-panels-add { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.su-panels-add .su-select { flex: 1 1 220px; }
+.su-panels-preview { display: grid; gap: 12px; min-width: 0; }
+.su-panel-preview-card { padding: 12px; border: 1px solid var(--su-border); border-radius: 10px; min-width: 0; }
+.su-panel-preview-label { margin-bottom: 8px; font-size: 11px; font-weight: 750; text-transform: uppercase; letter-spacing: .06em; opacity: .65; }
+.su-panel-preview-fields { display: grid; gap: 8px; min-width: 0; }
+.su-panel-preview-image { width: 100%; max-height: 340px; object-fit: cover; border-radius: 8px; }
+@media (max-width: 800px) {
+  .su-panel-card-header { align-items: flex-start; flex-direction: column; }
+  .su-panel-actions { justify-content: flex-start; }
+}
+
 /* Navigation elements */
 .su-nav-header {
   font-weight: 700;

@@ -36,6 +36,7 @@ const RAW_FIELD_TYPES = [
   "relation_user",
   "taxonomy",
   "repeater",
+  "panels",
 ];
 
 function labelFromFieldType(type) {
@@ -56,6 +57,8 @@ function labelFromFieldType(type) {
       return "User relation";
     case "repeater":
       return "Repeater";
+    case "panels":
+      return "Panels (page sections)";
     default:
       return type
         .replace(/_/g, " ")
@@ -67,6 +70,66 @@ const FIELD_TYPES = RAW_FIELD_TYPES.map((t) => ({
   value: t,
   label: labelFromFieldType(t),
 }));
+
+const STARTER_PANEL_CONFIG = {
+  addLabel: "Add Panel",
+  definitions: [
+    { key: "hero", label: "Hero", description: "Large opening section with an image and calls to action.", fields: [
+      { field_key: "eyebrow", label: "Eyebrow", type: "text" },
+      { field_key: "heading", label: "Heading", type: "text", required: true },
+      { field_key: "body", label: "Body", type: "rich_text" },
+      { field_key: "image", label: "Hero image", type: "image" },
+      { field_key: "primary_label", label: "Primary button label", type: "text" },
+      { field_key: "primary_url", label: "Primary button URL", type: "url" },
+      { field_key: "secondary_label", label: "Secondary button label", type: "text" },
+      { field_key: "secondary_url", label: "Secondary button URL", type: "url" }
+    ]},
+    { key: "rich_text", label: "Rich Text", description: "A writing-focused content section.", fields: [
+      { field_key: "heading", label: "Heading", type: "text" },
+      { field_key: "body", label: "Body", type: "rich_text", required: true }
+    ]},
+    { key: "image_text", label: "Image + Text", description: "An image beside formatted text.", fields: [
+      { field_key: "heading", label: "Heading", type: "text" },
+      { field_key: "body", label: "Body", type: "rich_text" },
+      { field_key: "image", label: "Image", type: "image" },
+      { field_key: "alignment", label: "Image position", type: "select", config: { choices: [{ value: "left", label: "Left" }, { value: "right", label: "Right" }] } }
+    ]},
+    { key: "cta", label: "Call to Action", description: "A focused message with a button.", fields: [
+      { field_key: "heading", label: "Heading", type: "text", required: true },
+      { field_key: "body", label: "Body", type: "rich_text" },
+      { field_key: "button_label", label: "Button label", type: "text" },
+      { field_key: "button_url", label: "Button URL", type: "url" }
+    ]},
+    { key: "contact_intro", label: "Contact Intro", description: "Introductory contact information.", fields: [
+      { field_key: "heading", label: "Heading", type: "text" },
+      { field_key: "body", label: "Body", type: "rich_text" },
+      { field_key: "phone", label: "Phone", type: "phone" },
+      { field_key: "email", label: "Email", type: "email" }
+    ]}
+  ],
+  templates: [
+    { key: "standard", label: "Standard Page", allowed: ["rich_text", "image_text", "cta"], fixed: false },
+    { key: "homepage", label: "Homepage", allowed: ["hero", "image_text", "rich_text", "cta"], fixed: false, defaults: ["hero"] },
+    { key: "about", label: "About Page", allowed: ["hero", "image_text", "rich_text", "cta"], fixed: false },
+    { key: "contact", label: "Contact Page", allowed: ["hero", "contact_intro", "rich_text", "cta"], fixed: false, defaults: ["contact_intro"] }
+  ]
+};
+
+function JsonConfigTextarea({ value, onChange, rows = 12 }) {
+  const [text, setText] = useState(() => JSON.stringify(value || [], null, 2));
+  const [valid, setValid] = useState(true);
+  useEffect(() => setText(JSON.stringify(value || [], null, 2)), [value]);
+  return <div>
+    <textarea className="su-input" rows={rows} value={text} onChange={(e) => {
+      const next = e.target.value;
+      setText(next);
+      try { onChange(JSON.parse(next)); setValid(true); } catch { setValid(false); }
+    }} />
+    <div className="text-[11px]" style={{ color: valid ? "#166534" : "#b91c1c" }}>
+      {valid ? "Valid configuration" : "Invalid JSON — changes are not saved yet"}
+    </div>
+  </div>;
+}
 
 // === SUBFIELDS SUPPORT (name/address/media) ===
 const SUBFIELD_MAP = {
@@ -1105,6 +1168,35 @@ export default function QuickBuilderPage() {
           </div>
         )}
 
+        {type === "panels" && (
+          <div className="mb-4 space-y-4">
+            <div>
+              <div className="font-medium">Panels and Page Templates</div>
+              <p className="text-xs text-gray-500">
+                Panels are typed website sections. Templates determine which Panels an entry may use and whether their order is flexible or fixed.
+              </p>
+            </div>
+            <button type="button" className="su-btn primary" onClick={() => onChange({ ...STARTER_PANEL_CONFIG })}>
+              Install starter Panels + templates
+            </button>
+            <label className="space-y-1 block">
+              <span className="font-medium text-xs">Add button label</span>
+              <input className="su-input" value={cfg.addLabel || "Add Panel"} onChange={(e) => updateCfg({ addLabel: e.target.value })} />
+            </label>
+            <div>
+              <div className="font-medium text-xs mb-1">Panel definitions</div>
+              <JsonConfigTextarea value={cfg.definitions || []} onChange={(definitions) => updateCfg({ definitions })} rows={18} />
+            </div>
+            <div>
+              <div className="font-medium text-xs mb-1">Page templates</div>
+              <JsonConfigTextarea value={cfg.templates || []} onChange={(templates) => updateCfg({ templates })} rows={12} />
+              <p className="text-[11px] text-gray-500">
+                A fixed template may use <code>slots</code>; a flexible template may use <code>defaults</code> and <code>allowed</code> Panel keys.
+              </p>
+            </div>
+          </div>
+        )}
+
         {type === "repeater" && (
           <div className="mb-4 space-y-3">
             <div className="font-medium">Repeater settings</div>
@@ -1536,6 +1628,7 @@ export default function QuickBuilderPage() {
           "name",
           "address",
           "repeater",
+          "panels",
           "date",
           "datetime",
           "time",
