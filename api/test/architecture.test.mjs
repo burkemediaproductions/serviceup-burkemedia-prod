@@ -129,6 +129,11 @@ test('dashboard polish includes branded chrome, reorderable navigation, and stab
   assert.match(settings, /Show JSON for/);
   assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /const canCustomize = currentRole === "ADMIN"/);
   assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /canCustomize && <section className="su-dashboard-add"/);
+  assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /\{\{name\}\}/);
+  assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /\{\{date\}\}/);
+  assert.match(editor, /Back to editor/);
+  assert.match(editor, /Preview entry/);
+  assert.match(read('dashboard/src/pages/Users/index.jsx'), /su-user-name-actions/);
 });
 test('navigation settings offer Content Types and saved List Views', () => {
   const page = read('dashboard/src/pages/Settings/index.jsx');

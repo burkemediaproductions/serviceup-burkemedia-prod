@@ -1,6 +1,7 @@
 // admin/src/pages/Dashboards/index.jsx
 import React, { useMemo, useState } from "react";
 import { useDashboard } from "../../hooks/useDashboard";
+import { useAuth } from "../../context/AuthContext";
 
 // Basic library of widget "types" the builder can create
 const WIDGET_LIBRARY = [
@@ -23,7 +24,7 @@ const WIDGET_LIBRARY = [
     description:
       "Free-form HTML content: announcements, instructions, embedded iframes, etc.",
     defaultConfig: {
-      html: "<p>Edit this HTML block to add announcements or instructions.</p>",
+      html: "<p>Hello, <strong>{{name}}</strong>!</p><p>Today is {{date}}.</p>",
     },
     roles: ["ADMIN", "EDITOR"],
   },
@@ -41,6 +42,12 @@ const WIDGET_LIBRARY = [
   },
 ];
 
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>'"]/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;',
+  })[character]);
+}
+
 function getCurrentRole() {
   try {
     const raw = localStorage.getItem("serviceup.user");
@@ -53,6 +60,7 @@ function getCurrentRole() {
 }
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const {
     widgets,
     loading,
@@ -70,6 +78,12 @@ export default function DashboardPage() {
 
   const currentRole = getCurrentRole();
   const canCustomize = currentRole === "ADMIN";
+  const greetingValues = {
+    name: user?.name || String(user?.email || 'there').split('@')[0],
+    date: new Intl.DateTimeFormat(undefined, { dateStyle: 'full' }).format(new Date()),
+  };
+  const renderTemplate = (value, html = false) => String(value || '')
+    .replace(/\{\{\s*(name|date)\s*\}\}/gi, (_, key) => html ? escapeHtml(greetingValues[key.toLowerCase()]) : greetingValues[key.toLowerCase()]);
 
   // Only show widgets allowed for the current role
   const visibleWidgets = useMemo(
@@ -118,7 +132,7 @@ export default function DashboardPage() {
     return (
       <div key={key} className="su-card su-dashboard-widget">
         <div className="su-dashboard-widget__header">
-          <h3>{title || libraryDef?.title || "Widget"}</h3>
+          <h3>{renderTemplate(title || libraryDef?.title || "Widget")}</h3>
           {canCustomize && <div className="su-dashboard-widget__actions">
             <button
               type="button"
@@ -136,6 +150,10 @@ export default function DashboardPage() {
             </button>
           </div>}
         </div>
+
+        {editingId === id && draft && type === 'html-block' && (
+          <p className="su-help">Personalize the title or message with <code>{'{{name}}'}</code> and <code>{'{{date}}'}</code>.</p>
+        )}
 
         {editingId === id && draft && <div className="su-card--soft" style={{padding:12,marginBottom:12}}><label className="su-label">Widget title<input className="su-input" value={draft.title || ''} onChange={(e)=>setDraft({...draft,title:e.target.value})}/></label>{type === 'html-block' && <label className="su-label">HTML content<textarea className="su-input" rows="5" value={draft.config?.html || ''} onChange={(e)=>setDraft({...draft,config:{...draft.config,html:e.target.value}})}/></label>}{type === 'quick-links' && <div><strong>Quick links</strong>{(draft.config?.links||[]).map((link,index)=><div key={link.id||index} style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:8}}><input className="su-input" value={link.label||''} onChange={(e)=>setDraft({...draft,config:{...draft.config,links:draft.config.links.map((x,i)=>i===index?{...x,label:e.target.value}:x)}})}/><input className="su-input" value={link.href||''} onChange={(e)=>setDraft({...draft,config:{...draft.config,links:draft.config.links.map((x,i)=>i===index?{...x,href:e.target.value}:x)}})}/><button className="su-btn danger" onClick={()=>setDraft({...draft,config:{...draft.config,links:draft.config.links.filter((_,i)=>i!==index)}})}>Remove</button></div>)}<button className="su-btn" onClick={()=>setDraft({...draft,config:{...draft.config,links:[...(draft.config?.links||[]),{id:`link-${Date.now()}`,label:'New link',href:'/'}]}})}>+ Add link</button></div>}<div style={{display:'flex',gap:8,marginTop:10}}><button className="su-btn primary" onClick={()=>{updateWidget(id,{title:draft.title,config:draft.config});setEditingId(null);setDraft(null)}}>Save Widget</button><button className="su-btn" onClick={()=>{setEditingId(null);setDraft(null)}}>Cancel</button></div></div>}
 
@@ -161,7 +179,7 @@ export default function DashboardPage() {
             <div
               className="su-dashboard-html"
               // This is specifically for trusted admin-created content
-              dangerouslySetInnerHTML={{ __html: config.html || "" }}
+              dangerouslySetInnerHTML={{ __html: renderTemplate(config.html || "", true) }}
             />
           )}
 

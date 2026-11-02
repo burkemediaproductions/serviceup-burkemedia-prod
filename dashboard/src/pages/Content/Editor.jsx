@@ -882,16 +882,18 @@ export default function Editor() {
   // ---------------------------------------------------------------------------
   return (
     <div className={`su-grid ${coreCfg.layout === "split" ? "cols-2" : "su-entry-layout-stacked"}`}>
+      {!coreCfg.hidePreview && coreCfg.layout === "toggle" && (
+        <div className="su-entry-mode-bar">
+          <button type="button" className="su-btn primary su-preview-toggle" onClick={() => setPreviewOpen((open) => !open)} aria-pressed={previewOpen}>
+            <span aria-hidden="true">{previewOpen ? "✎" : "◫"}</span>
+            {previewOpen ? "Back to editor" : "Preview entry"}
+          </button>
+        </div>
+      )}
       {/* LEFT: Editor card */}
-      <div className="su-card">
+      {!(coreCfg.layout === "toggle" && previewOpen) && <div className="su-card">
         <div className="su-entry-heading">
           <h2 style={{ margin: 0 }}>{isNew ? `New ${typeSlug} entry` : `Edit ${typeSlug}`}</h2>
-          {!coreCfg.hidePreview && coreCfg.layout === "toggle" && (
-            <button type="button" className={"su-btn su-preview-toggle" + (previewOpen ? " primary" : "")} onClick={() => setPreviewOpen((open) => !open)} aria-expanded={previewOpen}>
-              <span aria-hidden="true">{previewOpen ? "✕" : "◫"}</span>
-              {previewOpen ? "Hide preview" : "Show preview"}
-            </button>
-          )}
         </div>
 
         {settings?.showEntryViewSwitcher !== false && editorViews.length > 1 && (
@@ -1107,7 +1109,7 @@ export default function Editor() {
             </button>
           </div>
         </form>
-      </div>
+      </div>}
 
       {/* RIGHT: Preview card (can be hidden by view config) */}
       {!coreCfg.hidePreview && (coreCfg.layout !== "toggle" || previewOpen) && (

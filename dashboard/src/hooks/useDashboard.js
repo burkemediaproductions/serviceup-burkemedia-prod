@@ -7,9 +7,9 @@ const DEFAULT_LAYOUT = [
   {
     id: "welcome",
     type: "html-block",
-    title: "Welcome to ServiceUp",
+    title: "Hello, {{name}}!",
     config: {
-      html: "<p>Use the dashboard builder to add widgets for your team.</p>",
+      html: "<p>Welcome back. Today is {{date}}.</p>",
     },
     roles: ["ADMIN", "EDITOR"],
   },

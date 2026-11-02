@@ -291,7 +291,7 @@ export default function UsersPage() {
 
                       {/* ✅ Editable Name column */}
                       <td>
-                        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <div className="su-user-name-editor">
                           <input
                             className="su-input"
                             value={nameDraft}
@@ -310,26 +310,26 @@ export default function UsersPage() {
                             style={{ minWidth: 180 }}
                           />
 
-                          <button
-                            type="button"
-                            className="su-btn primary"
-                            disabled={!dirty || nameSaving}
-                            onClick={() => saveName(u)}
-                            style={{ fontSize: 12, padding: '6px 10px' }}
-                          >
-                            {nameSaving ? 'Saving…' : 'Save'}
-                          </button>
-
-                          {dirty && !nameSaving && (
+                          <div className="su-user-name-actions">
                             <button
                               type="button"
-                              className="su-btn"
-                              onClick={() => cancelNameEdit(u)}
-                              style={{ fontSize: 12, padding: '6px 10px' }}
+                              className="su-btn primary"
+                              disabled={!dirty || nameSaving}
+                              onClick={() => saveName(u)}
                             >
-                              Cancel
+                              {nameSaving ? 'Saving…' : 'Save'}
                             </button>
-                          )}
+
+                            {dirty && !nameSaving && (
+                              <button
+                                type="button"
+                                className="su-btn"
+                                onClick={() => cancelNameEdit(u)}
+                              >
+                                Cancel
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </td>
 

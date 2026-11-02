@@ -795,6 +795,8 @@ button {
 .su-dashboard-add__type-title { font-weight: 750; }
 .su-dashboard-add__type-description { color: var(--su-muted); font-size: .82rem; line-height: 1.4; }
 .su-entry-json { grid-column: 1 / -1; }
+.su-entry-mode-bar { grid-column: 1 / -1; display: flex; justify-content: flex-end; position: sticky; top: 76px; z-index: 8; }
+.su-entry-mode-bar .su-btn { box-shadow: 0 8px 22px color-mix(in srgb, var(--su-text) 14%, transparent); }
 .su-code-block { margin: 0; padding: 12px; max-height: 480px; overflow: auto; border-radius: var(--su-radius); background: #0b1120; color: #d1fae5; font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
 
 .su-brand-logo { display: block; max-width: 100%; object-fit: contain; }
@@ -809,6 +811,9 @@ button {
 .su-dashboard-widgets { margin-top: 24px; }
 .su-dashboard-widget + .su-dashboard-widget { margin-top: 16px; }
 .su-dashboard-add { margin-bottom: 24px; }
+.su-user-name-editor { display: grid; gap: 8px; min-width: 220px; }
+.su-user-name-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.su-user-name-actions .su-btn { min-width: 82px; font-size: 12px; padding: 7px 12px; }
 
 /* Small compatibility layer for the Settings screen's layout utilities. */
 .flex { display: flex; }
