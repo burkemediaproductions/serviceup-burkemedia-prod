@@ -90,6 +90,8 @@ test('branding supports tenant palettes, reading mode, backgrounds, menu colors,
   assert.match(branding, /allowUserToggle/);
   assert.match(branding, /enableReadingMode/);
   assert.match(branding, /menuButtonActiveBg/);
+  assert.match(branding, /dangerText/);
+  assert.match(page, /Delete and remove buttons/);
   assert.match(branding, /backgroundVideoUrl/);
   assert.match(branding, /loginBackgroundVideoUrl/);
   assert.match(branding, /serviceup-custom-css/);
@@ -122,6 +124,9 @@ test('dashboard polish includes branded chrome, reorderable navigation, and stab
   assert.match(editor, /coreCfg\.layout !== "toggle" \|\| previewOpen/);
   assert.match(editor, /su-entry-json/);
   assert.match(settings, /Branding & Appearance/);
+  assert.match(settings, /Show JSON for/);
+  assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /const canCustomize = currentRole === "ADMIN"/);
+  assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /canCustomize && <section className="su-dashboard-add"/);
 });
 test('navigation settings offer Content Types and saved List Views', () => {
   const page = read('dashboard/src/pages/Settings/index.jsx');

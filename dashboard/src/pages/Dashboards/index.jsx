@@ -69,6 +69,7 @@ export default function DashboardPage() {
   const [draft, setDraft] = useState(null);
 
   const currentRole = getCurrentRole();
+  const canCustomize = currentRole === "ADMIN";
 
   // Only show widgets allowed for the current role
   const visibleWidgets = useMemo(
@@ -118,7 +119,7 @@ export default function DashboardPage() {
       <div key={key} className="su-card su-dashboard-widget">
         <div className="su-dashboard-widget__header">
           <h3>{title || libraryDef?.title || "Widget"}</h3>
-          <div className="su-dashboard-widget__actions">
+          {canCustomize && <div className="su-dashboard-widget__actions">
             <button
               type="button"
               className="su-btn"
@@ -133,7 +134,7 @@ export default function DashboardPage() {
             >
               Remove
             </button>
-          </div>
+          </div>}
         </div>
 
         {editingId === id && draft && <div className="su-card--soft" style={{padding:12,marginBottom:12}}><label className="su-label">Widget title<input className="su-input" value={draft.title || ''} onChange={(e)=>setDraft({...draft,title:e.target.value})}/></label>{type === 'html-block' && <label className="su-label">HTML content<textarea className="su-input" rows="5" value={draft.config?.html || ''} onChange={(e)=>setDraft({...draft,config:{...draft.config,html:e.target.value}})}/></label>}{type === 'quick-links' && <div><strong>Quick links</strong>{(draft.config?.links||[]).map((link,index)=><div key={link.id||index} style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:8}}><input className="su-input" value={link.label||''} onChange={(e)=>setDraft({...draft,config:{...draft.config,links:draft.config.links.map((x,i)=>i===index?{...x,label:e.target.value}:x)}})}/><input className="su-input" value={link.href||''} onChange={(e)=>setDraft({...draft,config:{...draft.config,links:draft.config.links.map((x,i)=>i===index?{...x,href:e.target.value}:x)}})}/><button className="su-btn danger" onClick={()=>setDraft({...draft,config:{...draft.config,links:draft.config.links.filter((_,i)=>i!==index)}})}>Remove</button></div>)}<button className="su-btn" onClick={()=>setDraft({...draft,config:{...draft.config,links:[...(draft.config?.links||[]),{id:`link-${Date.now()}`,label:'New link',href:'/'}]}})}>+ Add link</button></div>}<div style={{display:'flex',gap:8,marginTop:10}}><button className="su-btn primary" onClick={()=>{updateWidget(id,{title:draft.title,config:draft.config});setEditingId(null);setDraft(null)}}>Save Widget</button><button className="su-btn" onClick={()=>{setEditingId(null);setDraft(null)}}>Cancel</button></div></div>}
@@ -199,8 +200,9 @@ export default function DashboardPage() {
         <div>
           <h1 className="su-page-title">Dashboard</h1>
           <p className="su-page-subtitle">
-            Role: <strong>{currentRole}</strong>. Customize widgets for each
-            role using the builder below.
+            {canCustomize
+              ? <>Role: <strong>{currentRole}</strong>. Customize widgets for each role using the builder below.</>
+              : <>Your dashboard.</>}
           </p>
         </div>
         <div className="su-page-header__actions">
@@ -219,7 +221,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <section className="su-dashboard-add">
+      {canCustomize && <section className="su-dashboard-add">
         <div className="su-card su-dashboard-add__card">
           <div className="su-dashboard-add__header">
             <h2>Add Widget</h2>
@@ -249,14 +251,16 @@ export default function DashboardPage() {
             )}
           </div>
         </div>
-      </section>
+      </section>}
 
       <section className="su-dashboard-widgets">
         {loading ? (
           <p className="su-text-muted">Loading dashboard…</p>
         ) : visibleWidgets.length === 0 ? (
           <p className="su-text-muted">
-            No widgets yet. Use “Add Widget” above to create one.
+            {canCustomize
+              ? 'No widgets yet. Use “Add Widget” above to create one.'
+              : 'No dashboard items are available for your role.'}
           </p>
         ) : (
           <div className="su-grid cols-2 gap-lg">

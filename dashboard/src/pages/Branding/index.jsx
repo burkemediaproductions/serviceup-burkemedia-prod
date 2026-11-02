@@ -21,6 +21,9 @@ const MENU_FIELDS = [
   ['menuButtonHoverBg', 'Button hover'], ['menuButtonActiveBg', 'Active button'],
   ['menuButtonActiveText', 'Active text'],
 ];
+const ACTION_FIELDS = [
+  ['danger', 'Delete / remove button'], ['dangerText', 'Delete / remove text'],
+];
 
 function ColorGrid({ palette, onChange, fields }) {
   return <div className="su-brand-color-grid">{fields.map(([key, label]) =>
@@ -142,6 +145,8 @@ export default function BrandingPage() {
         <ColorGrid palette={palette} fields={COLOR_FIELDS} onChange={(key, value) => setPalette(mode, key, value)} />
         <h3>Menu buttons</h3>
         <ColorGrid palette={palette} fields={MENU_FIELDS} onChange={(key, value) => setPalette(mode, key, value)} />
+        <h3>Delete and remove buttons</h3>
+        <ColorGrid palette={palette} fields={ACTION_FIELDS} onChange={(key, value) => setPalette(mode, key, value)} />
         {mode !== 'reading' && <>
           <h3>Dashboard background</h3>
           <div className="su-grid cols-2">

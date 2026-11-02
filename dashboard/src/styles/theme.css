@@ -224,8 +224,8 @@ button {
   border-color: transparent;
 }
 .su-btn.danger, .su-btn-danger, .su-btn-error {
-  background: #b42318;
-  color: #fff;
+  background: var(--su-danger, #b42318);
+  color: var(--su-danger-text, #fff);
   border-color: transparent;
 }
 .su-btn:disabled, .su-icon-btn:disabled { opacity: .45; cursor: not-allowed; }
