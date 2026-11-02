@@ -841,7 +841,7 @@ export default function QuickBuilderPage() {
                   className="su-input"
                   value={cfg.inverseKey || ""}
                   onChange={(e) => updateCfg({ inverseKey: e.target.value })}
-                  placeholder="e.g. surrogates"
+                  placeholder="e.g. posts"
                 />
               </label>
             </div>

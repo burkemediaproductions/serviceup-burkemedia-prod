@@ -1111,7 +1111,7 @@ if (newly) loadViewForEdit(newly);
                         <option value="template">Derived (template)</option>
                       </select>
                       <div className="su-text-xs su-text-muted">
-                        Use “Derived” for surrogates/intended parents.
+                        Use “Derived” when the title should be generated automatically from entry fields.
                       </div>
                     </div>
 
@@ -1191,9 +1191,12 @@ if (newly) loadViewForEdit(newly);
                           setDirty(true);
                         }}
                       >
-                        <option value="split">Fields and preview side by side</option>
-                        <option value="stacked">Writing layout: fields above preview</option>
+                        <option value="split">Side by side: Edit form + Preview</option>
+                        <option value="stacked">Full width: Edit form, then Preview underneath</option>
                       </select>
+                      <div className="su-text-xs su-text-muted">
+                        Full width is useful for writing-focused views such as posts, articles, and pages.
+                      </div>
                     </div>
 
                     <label className="su-chip su-items-center su-gap-xs">
