@@ -337,6 +337,7 @@ export default function Editor() {
   const [editorViews, setEditorViews] = useState([]);
   const [activeViewSlug, setActiveViewSlug] = useState("");
   const [activeViewLabel, setActiveViewLabel] = useState("");
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const overallLoading = loadingEntry || loadingType;
 
@@ -356,11 +357,13 @@ export default function Editor() {
       hideSlug: !!c.hideSlug,
       hideStatus: !!c.hideStatus,
       hidePreview: !!c.hidePreview,
-      layout: c.layout === "stacked" ? "stacked" : "split",
+      layout: ["stacked", "toggle"].includes(c.layout) ? c.layout : "split",
       richTextLarge: !!c.richTextLarge,
       autoSlugFromTitleIfEmpty: c.autoSlugFromTitleIfEmpty !== false,
     };
   }, [editorViewConfig]);
+
+  useEffect(() => { setPreviewOpen(false); }, [activeViewSlug]);
 
   // ---------------------------------------------------------------------------
   // Load content type (with fields) + editor views for the current role
@@ -370,6 +373,9 @@ export default function Editor() {
 
     async function loadTypeAndView() {
       setLoadingType(true);
+      setContentType(null);
+      setEditorViewConfig(null);
+      setEditorViews([]);
       setError("");
 
       try {
@@ -901,18 +907,28 @@ export default function Editor() {
 
   const hideJson = !!settings?.hideJsonByRole?.[roleUpper];
 
+  if (overallLoading) {
+    return <div className="su-page"><div className="su-card su-loading-panel" role="status"><div className="su-loading-spinner" /><span>Loading editor…</span></div></div>;
+  }
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <div className={`su-grid ${coreCfg.layout === "stacked" ? "su-entry-layout-stacked" : "cols-2"}`}>
+    <div className={`su-grid ${coreCfg.layout === "split" ? "cols-2" : "su-entry-layout-stacked"}`}>
       {/* LEFT: Editor card */}
       <div className="su-card">
-        <h2 style={{ marginTop: 0, marginBottom: 12 }}>
-          {overallLoading ? "Edit entry" : isNew ? `New ${typeSlug} entry` : `Edit ${typeSlug}`}
-        </h2>
+        <div className="su-entry-heading">
+          <h2 style={{ margin: 0 }}>{isNew ? `New ${typeSlug} entry` : `Edit ${typeSlug}`}</h2>
+          {!coreCfg.hidePreview && coreCfg.layout === "toggle" && (
+            <button type="button" className={"su-btn su-preview-toggle" + (previewOpen ? " primary" : "")} onClick={() => setPreviewOpen((open) => !open)} aria-expanded={previewOpen}>
+              <span aria-hidden="true">{previewOpen ? "✕" : "◫"}</span>
+              {previewOpen ? "Hide preview" : "Show preview"}
+            </button>
+          )}
+        </div>
 
-        {editorViews.length > 0 && (
+        {settings?.showEntryViewSwitcher !== false && editorViews.length > 1 && (
           <div className="su-card su-mb-md">
             <div className="su-card-body su-flex su-flex-wrap su-gap-sm su-items-center">
               <span className="su-text-sm su-text-muted">Views:</span>
@@ -927,7 +943,7 @@ export default function Editor() {
                   <button
                     key={v.slug}
                     type="button"
-                    className={"su-chip" + (v.slug === activeViewSlug ? " su-chip--active" : "")}
+                    className={"su-btn su-view-btn" + (v.slug === activeViewSlug ? " primary" : "")}
                     onClick={() => {
                       if (v.slug === activeViewSlug) return;
                       // ✅ drive selection via URL param; loader effect will apply config
@@ -974,8 +990,6 @@ export default function Editor() {
             {saveMessage}
           </div>
         )}
-
-        {overallLoading && !isNew && <p style={{ fontSize: 13, opacity: 0.7 }}>Loading entry…</p>}
 
         <form onSubmit={handleSave}>
           {/* Core fields */}
@@ -1033,14 +1047,11 @@ export default function Editor() {
               }}
             >
               <h3 style={{ margin: 0, fontSize: 14 }}>Fields</h3>
-              <span style={{ fontSize: 11, opacity: 0.7 }}>
-                Powered by QuickBuilder &amp; editor views.
-              </span>
             </div>
 
             {!sections.length && (
               <p style={{ fontSize: 12, opacity: 0.7 }}>
-                No fields defined for this content type yet. Create fields in QuickBuilder.
+                No fields are configured for this content type yet.
               </p>
             )}
 
@@ -1133,8 +1144,8 @@ export default function Editor() {
       </div>
 
       {/* RIGHT: Preview card (can be hidden by view config) */}
-      {!coreCfg.hidePreview && (
-        <div className="su-card">
+      {!coreCfg.hidePreview && (coreCfg.layout !== "toggle" || previewOpen) && (
+        <div className="su-card su-preview-panel">
           <h2 style={{ marginTop: 0, marginBottom: 12 }}>Preview</h2>
 
           <div

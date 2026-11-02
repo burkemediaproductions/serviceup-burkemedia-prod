@@ -4,6 +4,8 @@ import { api } from '../lib/api';
 // Import your Supabase client
 import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { useSettings } from '../context/SettingsContext';
+import { getThemeBackground } from '../lib/branding';
 
 /**
  * JWT-based login for the admin UI.
@@ -13,10 +15,19 @@ import { useAuth } from '../context/AuthContext';
 export default function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { settings, themeMode } = useSettings();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const background = getThemeBackground(settings, themeMode, 'login');
+  const backgroundStyle = {
+    '--su-page-image': background.imageUrl
+      ? `url("${String(background.imageUrl).replace(/"/g, '%22')}")`
+      : 'none',
+    '--su-page-gradient': background.gradient || 'none',
+    '--su-page-overlay': background.overlay || '#00000000',
+  };
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -65,14 +76,19 @@ export default function LoginPage() {
 
   return (
     <div
+      className="su-login-page"
       style={{
         minHeight: '100vh',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'var(--su-bg, #0f172a)',
       }}
     >
+      <div className="su-brand-background" style={backgroundStyle} aria-hidden="true">
+        {background.videoUrl && <video key={`${themeMode}-${background.videoUrl}`} autoPlay muted loop playsInline><source src={background.videoUrl} /></video>}
+        <div className="su-brand-background-image" />
+        <div className="su-brand-background-overlay" />
+      </div>
       <div
         className="su-card"
         style={{
@@ -81,7 +97,8 @@ export default function LoginPage() {
           boxShadow: '0 18px 45px rgba(15,23,42,0.45)',
         }}
       >
-        <h1 style={{ marginTop: 0, marginBottom: 8 }}>ServiceUp Login</h1>
+        {settings?.logoUrl && <img className="su-brand-logo su-brand-logo--login" src={settings.logoUrl} alt={settings?.appName || settings?.app_name || 'ServiceUp'} />}
+        <h1 style={{ marginTop: 0, marginBottom: 8 }}>{settings?.appName || settings?.app_name || 'ServiceUp'} Login</h1>
         <p style={{ marginTop: 0, opacity: 0.8, fontSize: 14 }}>
           Sign in to manage your clients, content, dashboard, and more.
         </p>

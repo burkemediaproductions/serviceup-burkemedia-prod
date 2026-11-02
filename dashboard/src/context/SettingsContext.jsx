@@ -1,12 +1,16 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import { applyBranding, cacheSettings, preloadBrandImages, readCachedSettings } from '../lib/branding';
+import {
+  applyBranding, cacheSettings, getEnabledThemeModes, preloadBrandImages,
+  readCachedSettings, readPreferredThemeMode, savePreferredThemeMode,
+} from '../lib/branding';
 
 const SettingsContext = createContext(null);
 
 export function SettingsProvider({ children }) {
   const cachedSettings = readCachedSettings();
   const [settings, setSettingsState] = useState(cachedSettings);
+  const [themeMode, setThemeModeState] = useState(() => readPreferredThemeMode(cachedSettings));
   const [loading, setLoading] = useState(!cachedSettings);
   const [listViewsVersion, setListViewsVersion] = useState(0);
 
@@ -65,19 +69,33 @@ export function SettingsProvider({ children }) {
   useEffect(() => {
     if (!settings) return;
 
-    applyBranding(settings);
+    const appliedMode = applyBranding(settings, themeMode);
+    if (appliedMode !== themeMode) setThemeModeState(appliedMode);
     cacheSettings(settings);
-  }, [settings]);
+  }, [settings, themeMode]);
 
   function setSettings(next) {
     setSettingsState((current) => {
       const resolved = typeof next === 'function' ? next(current) : next;
       if (resolved) {
-        applyBranding(resolved);
+        applyBranding(resolved, themeMode);
         cacheSettings(resolved);
       }
       return resolved;
     });
+  }
+
+  function setThemeMode(nextMode) {
+    const enabled = getEnabledThemeModes(settings);
+    const resolved = enabled.includes(nextMode) ? nextMode : enabled[0];
+    savePreferredThemeMode(resolved);
+    setThemeModeState(resolved);
+  }
+
+  function cycleThemeMode() {
+    const enabled = getEnabledThemeModes(settings);
+    const index = enabled.indexOf(themeMode);
+    setThemeMode(enabled[(index + 1) % enabled.length]);
   }
 
   // On a brand-new browser, wait for the first settings response so the UI's
@@ -90,6 +108,10 @@ export function SettingsProvider({ children }) {
         settings,
         setSettings,
         loading,
+        themeMode,
+        setThemeMode,
+        cycleThemeMode,
+        enabledThemeModes: getEnabledThemeModes(settings),
         listViewsVersion,
         bumpListViewsVersion,
       }}

@@ -790,7 +790,7 @@ if (newly) loadViewForEdit(newly);
         })}
         {!contentTypes.length && (
           <p className="su-text-sm su-text-muted">
-            No content types found. Create one in Quick Builder first.
+            No content types found. Create a content type first.
           </p>
         )}
       </div>
@@ -1183,19 +1183,26 @@ if (newly) loadViewForEdit(newly);
 
                     <div>
                       <label className="su-form-label">Editor layout</label>
-                      <select
-                        className="su-select"
-                        value={core.layout || "split"}
-                        onChange={(e) => {
-                          setCore((prev) => ({ ...prev, layout: e.target.value }));
-                          setDirty(true);
-                        }}
-                      >
-                        <option value="split">Side by side: Edit form + Preview</option>
-                        <option value="stacked">Full width: Edit form, then Preview underneath</option>
-                      </select>
+                      <div className="su-layout-choice-grid">
+                        {[
+                          ["split", "Side by side", "Edit and preview in two columns."],
+                          ["stacked", "Full width", "Edit first, with preview underneath."],
+                          ["toggle", "Toggle preview", "Full-width editor with a Show Preview button."],
+                        ].map(([value, label, description]) => (
+                          <button
+                            key={value}
+                            type="button"
+                            className={"su-layout-choice" + ((core.layout || "split") === value ? " is-active" : "")}
+                            onClick={() => { setCore((prev) => ({ ...prev, layout: value })); setDirty(true); }}
+                          >
+                            <span className={`su-layout-choice-icon is-${value}`} aria-hidden="true"><i /><i /></span>
+                            <strong>{label}</strong>
+                            <small>{description}</small>
+                          </button>
+                        ))}
+                      </div>
                       <div className="su-text-xs su-text-muted">
-                        Full width is useful for writing-focused views such as posts, articles, and pages.
+                        Full-width options are useful for writing-focused content such as posts, articles, and pages.
                       </div>
                     </div>
 

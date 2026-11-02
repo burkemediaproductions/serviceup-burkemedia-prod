@@ -83,6 +83,41 @@ test('branding is cached and applied before the dashboard first paint', () => {
   assert.match(main, /applyBranding\(readCachedSettings\(\)\)/);
   assert.match(branding, /localStorage\.setItem\(cacheKey\(\)/);
 });
+test('branding supports tenant palettes, reading mode, backgrounds, menu colors, and custom CSS', () => {
+  const page = read('dashboard/src/pages/Branding/index.jsx');
+  const branding = read('dashboard/src/lib/branding.js');
+  const topbar = read('dashboard/src/components/Topbar.jsx');
+  assert.match(branding, /allowUserToggle/);
+  assert.match(branding, /enableReadingMode/);
+  assert.match(branding, /menuButtonActiveBg/);
+  assert.match(branding, /backgroundVideoUrl/);
+  assert.match(branding, /loginBackgroundVideoUrl/);
+  assert.match(branding, /serviceup-custom-css/);
+  assert.match(page, /Custom CSS/);
+  assert.match(page, /Background video \(from Pixels\)/);
+  assert.match(page, /Login background video \(from Pixels\)/);
+  assert.match(read('dashboard/src/pages/Login.jsx'), /getThemeBackground\(settings, themeMode, 'login'\)/);
+  assert.match(topbar, /cycleThemeMode/);
+});
+test('dashboard polish includes branded chrome, reorderable navigation, and stable role-aware views', () => {
+  const settings = read('dashboard/src/pages/Settings/index.jsx');
+  const editor = read('dashboard/src/pages/Content/Editor.jsx');
+  const list = read('dashboard/src/pages/Content/TypeList.jsx');
+  assert.match(read('dashboard/src/components/Topbar.jsx'), /su-brand-logo--topbar/);
+  assert.match(read('dashboard/src/components/Sidebar.jsx'), /su-brand-logo--sidebar/);
+  assert.match(read('dashboard/src/pages/Login.jsx'), /su-brand-logo--login/);
+  assert.match(settings, /moveSidebarItem/);
+  assert.match(settings, /moveTopbarItem/);
+  assert.match(settings, /showEntryViewSwitcher/);
+  assert.match(settings, /showListViewSwitcher/);
+  assert.match(editor, /editorViews\.length > 1/);
+  assert.match(editor, /Loading editor/);
+  assert.doesNotMatch(editor, /Powered by QuickBuilder/);
+  assert.match(list, /listViews\.length > 1/);
+  assert.match(list, /su-loading-panel/);
+  assert.match(read('dashboard/src/pages/Settings/EntryViews.jsx'), /Toggle preview/);
+  assert.match(editor, /coreCfg\.layout !== "toggle" \|\| previewOpen/);
+});
 test('navigation settings offer Content Types and saved List Views', () => {
   const page = read('dashboard/src/pages/Settings/index.jsx');
   assert.match(page, /contentPageOptions/);

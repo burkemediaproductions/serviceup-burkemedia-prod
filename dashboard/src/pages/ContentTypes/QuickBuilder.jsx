@@ -230,7 +230,7 @@ function PanelsConfigBuilder({ config, onChange }) {
     <div className="qb-panels-heading">
       <div>
         <h3>Panel Types</h3>
-        <p>Create the sections that can appear on a page, then add fields just like regular QuickBuilder fields.</p>
+        <p>Create the sections that can appear on a page, then add the fields each section needs.</p>
       </div>
       <div className="su-flex su-gap-sm su-flex-wrap">
         <button type="button" className="su-btn" onClick={() => {

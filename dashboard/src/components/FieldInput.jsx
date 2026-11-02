@@ -1886,7 +1886,7 @@ function PanelsField({ field, value, onChange, entryContext, resolved, relatedCa
         {selectedTemplate?.description && <small>{selectedTemplate.description}</small>}
       </label>}
 
-      {!definitions.length && <div className="su-alert su-alert-danger">No Panel definitions are configured. Add starter Panels in QuickBuilder.</div>}
+      {!definitions.length && <div className="su-alert su-alert-danger">No Panel definitions are configured for this content type.</div>}
 
       <div className="su-panels-list">
         {current.panels.map((panel, index) => {

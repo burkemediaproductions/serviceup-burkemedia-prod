@@ -213,6 +213,11 @@ export default function TypeList() {
 
     (async () => {
       setLoading(true);
+      setRows([]);
+      setColumns([]);
+      setListViews([]);
+      setActiveViewSlug('');
+      setActiveViewLabel('');
       setError('');
       try {
         // 1) Load entries for this content type (by slug)
@@ -605,6 +610,10 @@ export default function TypeList() {
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
+  if (loading) {
+    return <div className="su-page"><div className="su-card su-loading-panel" role="status"><div className="su-loading-spinner" /><span>Loading entries…</span></div></div>;
+  }
+
   return (
     <div className="su-page">
       <div className="su-page-header su-flex su-justify-between su-items-center su-mb-md">
@@ -614,26 +623,19 @@ export default function TypeList() {
           </h1>
           <p className="su-page-subtitle">Manage entries for this content type.</p>
 
-          {activeViewLabel && (
+          {settings?.showListViewSwitcher !== false && listViews.length > 1 && activeViewLabel && (
             <p className="su-text-xs su-text-muted">
               Using view: <strong>{activeViewLabel}</strong>{' '}
               {activeViewIsDefaultForRole && '(default for this role)'}
             </p>
           )}
 
-          {!activeViewLabel && listViews.length === 0 && (
-            <p className="su-text-xs su-text-muted">
-              No list views configured yet for role {roleUpper}. Using a fallback
-              layout. You can customize columns in{' '}
-              <strong>Settings → List Views</strong>.
-            </p>
-          )}
         </div>
 
         <div className="su-flex su-gap-sm">
           <button
             type="button"
-            className="su-btn su-btn-primary"
+            className="su-btn primary"
             onClick={handleClickNew}
           >
             + New entry
@@ -641,7 +643,7 @@ export default function TypeList() {
         </div>
       </div>
 
-      {listViews.length > 0 && (
+      {settings?.showListViewSwitcher !== false && listViews.length > 1 && (
         <div className="su-card su-mb-md">
           <div className="su-card-body su-flex su-flex-wrap su-gap-sm su-items-center">
             <span className="su-text-sm su-text-muted">Views:</span>
@@ -658,9 +660,7 @@ export default function TypeList() {
                 <button
                   key={v.slug}
                   type="button"
-                  className={
-                    'su-chip' + (v.slug === activeViewSlug ? ' su-chip--active' : '')
-                  }
+                  className={'su-btn su-view-btn' + (v.slug === activeViewSlug ? ' primary' : '')}
                   onClick={() => handleChooseView(v.slug)}
                 >
                   {v.label || v.slug}
@@ -674,8 +674,6 @@ export default function TypeList() {
 
       <div className="su-card">
         <div className="su-card-body">
-          {loading && <p>Loading entries…</p>}
-
           {error && <div className="su-alert su-alert-danger su-mb-md">{error}</div>}
 
           {!loading && !rows.length && !error && (

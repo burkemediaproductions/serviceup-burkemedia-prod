@@ -216,6 +216,15 @@ export default function SettingsPage() {
       return { ...prev, navSidebar: nav };
     });
   }
+  function moveSidebarItem(index, direction) {
+    setForm((prev) => {
+      const nav = Array.isArray(prev.navSidebar) ? [...prev.navSidebar] : [];
+      const target = index + direction;
+      if (target < 0 || target >= nav.length) return prev;
+      [nav[index], nav[target]] = [nav[target], nav[index]];
+      return { ...prev, navSidebar: nav };
+    });
+  }
   function addTopbarItem() {
     setForm((prev) => ({
       ...prev,
@@ -231,6 +240,15 @@ export default function SettingsPage() {
         ? [...prev.navTopbarButtons]
         : [];
       items.splice(index, 1);
+      return { ...prev, navTopbarButtons: items };
+    });
+  }
+  function moveTopbarItem(index, direction) {
+    setForm((prev) => {
+      const items = Array.isArray(prev.navTopbarButtons) ? [...prev.navTopbarButtons] : [];
+      const target = index + direction;
+      if (target < 0 || target >= items.length) return prev;
+      [items[index], items[target]] = [items[target], items[index]];
       return { ...prev, navTopbarButtons: items };
     });
   }
@@ -275,6 +293,18 @@ export default function SettingsPage() {
       return { ...prev, navSidebar: nav };
     });
   }
+  function moveSidebarChild(parentIndex, childIndex, direction) {
+    setForm((prev) => {
+      const nav = Array.isArray(prev.navSidebar) ? [...prev.navSidebar] : [];
+      const parent = nav[parentIndex] || {};
+      const children = Array.isArray(parent.children) ? [...parent.children] : [];
+      const target = childIndex + direction;
+      if (target < 0 || target >= children.length) return prev;
+      [children[childIndex], children[target]] = [children[target], children[childIndex]];
+      nav[parentIndex] = { ...parent, children };
+      return { ...prev, navSidebar: nav };
+    });
+  }
   // Topbar children helpers
   function addTopbarChild(parentIndex) {
     setForm((prev) => {
@@ -302,6 +332,18 @@ export default function SettingsPage() {
       const parent = list[parentIndex] || {};
       const children = Array.isArray(parent.children) ? [...parent.children] : [];
       children.splice(childIndex, 1);
+      list[parentIndex] = { ...parent, children };
+      return { ...prev, navTopbarButtons: list };
+    });
+  }
+  function moveTopbarChild(parentIndex, childIndex, direction) {
+    setForm((prev) => {
+      const list = Array.isArray(prev.navTopbarButtons) ? [...prev.navTopbarButtons] : [];
+      const parent = list[parentIndex] || {};
+      const children = Array.isArray(parent.children) ? [...parent.children] : [];
+      const target = childIndex + direction;
+      if (target < 0 || target >= children.length) return prev;
+      [children[childIndex], children[target]] = [children[target], children[childIndex]];
       list[parentIndex] = { ...parent, children };
       return { ...prev, navTopbarButtons: list };
     });
@@ -382,7 +424,7 @@ export default function SettingsPage() {
           </p>
         </div>
       </div>
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.5fr),minmax(0,1.2fr)] gap-6 items-start">
+      <div className="grid grid-cols-1 su-settings-grid gap-6 items-start">
         {/* Left column: General + Branding */}
         <div className="space-y-4">
           <section className="su-card">
@@ -442,6 +484,18 @@ export default function SettingsPage() {
                   Hide JSON for {roleName}
                 </label>
               ))}
+            </div>
+            <div className="su-view-visibility-settings">
+              <h3>View controls</h3>
+              <label className="su-toggle-field">
+                <input type="checkbox" checked={form.showEntryViewSwitcher !== false} onChange={bind('showEntryViewSwitcher')} />
+                <span>Show Entry View choices when a role has multiple views</span>
+              </label>
+              <label className="su-toggle-field">
+                <input type="checkbox" checked={form.showListViewSwitcher !== false} onChange={bind('showListViewSwitcher')} />
+                <span>Show List View choices when a role has multiple views</span>
+              </label>
+              <p className="su-help">When disabled—or when a role only has its default view—ServiceUp applies the view without showing a selector.</p>
             </div>
           </section>
           <section className="su-card">
@@ -577,13 +631,11 @@ export default function SettingsPage() {
                         </option>
                       ))}
                     </select>
-                    <button
-                      type="button"
-                      className="su-btn"
-                      onClick={() => removeSidebarItem(i)}
-                    >
-                      ✕
-                    </button>
+                    <div className="su-btn-group">
+                      <button type="button" className="su-btn" onClick={() => moveSidebarItem(i, -1)} disabled={i === 0} title="Move up">↑</button>
+                      <button type="button" className="su-btn" onClick={() => moveSidebarItem(i, 1)} disabled={i === form.navSidebar.length - 1} title="Move down">↓</button>
+                      <button type="button" className="su-btn danger" onClick={() => removeSidebarItem(i)} title="Remove">✕</button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-[minmax(0,1fr),minmax(0,1fr)] gap-2 items-center">
                     <input
@@ -662,13 +714,11 @@ export default function SettingsPage() {
                                   </option>
                                 ))}
                               </select>
-                              <button
-                                type="button"
-                                className="su-btn"
-                                onClick={() => removeSidebarChild(i, ci)}
-                              >
-                                ✕
-                              </button>
+                              <div className="su-btn-group">
+                                <button type="button" className="su-btn" onClick={() => moveSidebarChild(i, ci, -1)} disabled={ci === 0} title="Move up">↑</button>
+                                <button type="button" className="su-btn" onClick={() => moveSidebarChild(i, ci, 1)} disabled={ci === item.children.length - 1} title="Move down">↓</button>
+                                <button type="button" className="su-btn danger" onClick={() => removeSidebarChild(i, ci)} title="Remove">✕</button>
+                              </div>
                             </div>
                             <div className="grid grid-cols-[minmax(0,1fr),minmax(0,1fr),minmax(0,1fr)] gap-2 items-center">
                               <input
@@ -760,13 +810,11 @@ export default function SettingsPage() {
                         </option>
                       ))}
                     </select>
-                    <button
-                      type="button"
-                      className="su-btn"
-                      onClick={() => removeTopbarItem(i)}
-                    >
-                      ✕
-                    </button>
+                    <div className="su-btn-group">
+                      <button type="button" className="su-btn" onClick={() => moveTopbarItem(i, -1)} disabled={i === 0} title="Move up">↑</button>
+                      <button type="button" className="su-btn" onClick={() => moveTopbarItem(i, 1)} disabled={i === form.navTopbarButtons.length - 1} title="Move down">↓</button>
+                      <button type="button" className="su-btn danger" onClick={() => removeTopbarItem(i)} title="Remove">✕</button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-[minmax(0,1fr),minmax(0,1fr)] gap-2 items-center">
                     <input
@@ -845,13 +893,11 @@ export default function SettingsPage() {
                                   </option>
                                 ))}
                               </select>
-                              <button
-                                type="button"
-                                className="su-btn"
-                                onClick={() => removeTopbarChild(i, ci)}
-                              >
-                                ✕
-                              </button>
+                              <div className="su-btn-group">
+                                <button type="button" className="su-btn" onClick={() => moveTopbarChild(i, ci, -1)} disabled={ci === 0} title="Move up">↑</button>
+                                <button type="button" className="su-btn" onClick={() => moveTopbarChild(i, ci, 1)} disabled={ci === item.children.length - 1} title="Move down">↓</button>
+                                <button type="button" className="su-btn danger" onClick={() => removeTopbarChild(i, ci)} title="Remove">✕</button>
+                              </div>
                             </div>
                             <div className="grid grid-cols-[minmax(0,1fr),minmax(0,1fr),minmax(0,1fr)] gap-2 items-center">
                               <input

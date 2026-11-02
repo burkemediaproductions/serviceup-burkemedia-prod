@@ -143,14 +143,17 @@ export default function Sidebar({ onClose, role = "VIEWER", onLogout }) {
 
   return (
     <aside className="su-sidebar" aria-label="Main navigation">
+      <div className="su-sidebar-brand">
+        {settings?.logoUrl && <img className="su-brand-logo su-brand-logo--sidebar" src={settings.logoUrl} alt={settings?.appName || settings?.app_name || 'ServiceUp'} />}
+      </div>
       {onClose && (
         <button
           type="button"
-          className="su-btn su-sidebar-close"
+          className="su-sidebar-close"
           onClick={onClose}
           aria-label="Close navigation menu"
         >
-          ✕ Close
+          ✕
         </button>
       )}
 
