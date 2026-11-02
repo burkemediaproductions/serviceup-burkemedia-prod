@@ -41,6 +41,7 @@ export default function Sidebar({ onClose, role = "VIEWER", onLogout }) {
   const defaultNav = useMemo(
     () => [
       { label: "Dashboard", to: "/admin" },
+      { label: "My Profile", to: "/admin/my-profile" },
       { label: "Menus", to: "/admin/menus" },
       { label: "Users", to: "/admin/users" },
       { label: "Taxonomies", to: "/admin/taxonomies" },

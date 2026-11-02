@@ -24,6 +24,15 @@ const MENU_FIELDS = [
 const ACTION_FIELDS = [
   ['danger', 'Delete / remove button'], ['dangerText', 'Delete / remove text'],
 ];
+const SIDEBAR_FIELDS = [
+  ['sidebarBg', 'Sidebar background'], ['sidebarText', 'Sidebar text'],
+  ['sidebarButtonBg', 'Sidebar button'], ['sidebarButtonText', 'Sidebar button text'],
+  ['sidebarButtonActiveBg', 'Sidebar active button'], ['sidebarButtonActiveText', 'Sidebar active text'],
+];
+const TOPBAR_FIELDS = [
+  ['topbarBg', 'Top bar background'], ['topbarText', 'Top bar text'],
+  ['topbarButtonBg', 'Top bar button'], ['topbarButtonText', 'Top bar button text'],
+];
 
 function ColorGrid({ palette, onChange, fields }) {
   return <div className="su-brand-color-grid">{fields.map(([key, label]) =>
@@ -145,6 +154,16 @@ export default function BrandingPage() {
         <ColorGrid palette={palette} fields={COLOR_FIELDS} onChange={(key, value) => setPalette(mode, key, value)} />
         <h3>Menu buttons</h3>
         <ColorGrid palette={palette} fields={MENU_FIELDS} onChange={(key, value) => setPalette(mode, key, value)} />
+        <h3>Sidebar</h3>
+        <ColorGrid palette={palette} fields={SIDEBAR_FIELDS} onChange={(key, value) => setPalette(mode, key, value)} />
+        {mode !== 'reading' && <>
+          {assetSelect('Sidebar background image (from Pixels)', palette.sidebarBackgroundImageUrl, (value) => setPalette(mode, 'sidebarBackgroundImageUrl', value), images, 'No sidebar background image')}
+          <label className="su-label">Sidebar CSS gradient
+            <input className="su-input" placeholder="linear-gradient(180deg, #172554, #0f766e)" value={palette.sidebarBackgroundGradient || ''} onChange={(event) => setPalette(mode, 'sidebarBackgroundGradient', event.target.value)} />
+          </label>
+        </>}
+        <h3>Top bar</h3>
+        <ColorGrid palette={palette} fields={TOPBAR_FIELDS} onChange={(key, value) => setPalette(mode, key, value)} />
         <h3>Delete and remove buttons</h3>
         <ColorGrid palette={palette} fields={ACTION_FIELDS} onChange={(key, value) => setPalette(mode, key, value)} />
         {mode !== 'reading' && <>

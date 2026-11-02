@@ -14,6 +14,9 @@ export const DEFAULT_THEME = {
     menuButtonBg: '#f6f7f8', menuButtonText: '#1f2937',
     menuButtonHoverBg: '#e8edf2', menuButtonActiveBg: '#0f766e', menuButtonActiveText: '#ffffff',
     danger: '#b42318', dangerText: '#ffffff',
+    sidebarBg: '#ffffff', sidebarText: '#1f2937', sidebarButtonBg: '#f6f7f8', sidebarButtonText: '#1f2937',
+    sidebarButtonActiveBg: '#0f766e', sidebarButtonActiveText: '#ffffff', sidebarBackgroundImageUrl: '', sidebarBackgroundGradient: '',
+    topbarBg: '#ffffff', topbarText: '#1f2937', topbarButtonBg: '#f6f7f8', topbarButtonText: '#1f2937',
     backgroundGradient: '', backgroundImageUrl: '', backgroundVideoUrl: '', backgroundOverlay: '#00000000',
     loginBackgroundGradient: '', loginBackgroundImageUrl: '', loginBackgroundVideoUrl: '', loginBackgroundOverlay: '#00000000',
   },
@@ -23,6 +26,9 @@ export const DEFAULT_THEME = {
     menuButtonBg: '#1a1a1a', menuButtonText: '#f7f7f7',
     menuButtonHoverBg: '#252525', menuButtonActiveBg: '#0f766e', menuButtonActiveText: '#ffffff',
     danger: '#ef4444', dangerText: '#ffffff',
+    sidebarBg: '#121212', sidebarText: '#f7f7f7', sidebarButtonBg: '#1a1a1a', sidebarButtonText: '#f7f7f7',
+    sidebarButtonActiveBg: '#0f766e', sidebarButtonActiveText: '#ffffff', sidebarBackgroundImageUrl: '', sidebarBackgroundGradient: '',
+    topbarBg: '#121212', topbarText: '#f7f7f7', topbarButtonBg: '#1a1a1a', topbarButtonText: '#f7f7f7',
     backgroundGradient: '', backgroundImageUrl: '', backgroundVideoUrl: '', backgroundOverlay: '#00000000',
     loginBackgroundGradient: '', loginBackgroundImageUrl: '', loginBackgroundVideoUrl: '', loginBackgroundOverlay: '#00000000',
   },
@@ -32,6 +38,9 @@ export const DEFAULT_THEME = {
     menuButtonBg: '#eee6d8', menuButtonText: '#29251f',
     menuButtonHoverBg: '#e3d8c6', menuButtonActiveBg: '#5f4934', menuButtonActiveText: '#fffdf7',
     danger: '#9b3a2b', dangerText: '#ffffff',
+    sidebarBg: '#fffdf7', sidebarText: '#29251f', sidebarButtonBg: '#eee6d8', sidebarButtonText: '#29251f',
+    sidebarButtonActiveBg: '#5f4934', sidebarButtonActiveText: '#fffdf7', sidebarBackgroundImageUrl: '', sidebarBackgroundGradient: '',
+    topbarBg: '#fffdf7', topbarText: '#29251f', topbarButtonBg: '#eee6d8', topbarButtonText: '#29251f',
     backgroundGradient: '', backgroundImageUrl: '', backgroundVideoUrl: '', backgroundOverlay: '#00000000',
     loginBackgroundGradient: '', loginBackgroundImageUrl: '', loginBackgroundVideoUrl: '', loginBackgroundOverlay: '#00000000',
   },
@@ -101,6 +110,7 @@ export async function preloadBrandImages(settings) {
   const urls = [settings.logoUrl, settings.topbarLogoUrl, settings.sidebarLogoUrl,
     settings.loginLogoUrl, settings.loadingImageUrl, settings.faviconUrl, settings.appIconUrl,
     theme.light.backgroundImageUrl, theme.dark.backgroundImageUrl,
+    theme.light.sidebarBackgroundImageUrl, theme.dark.sidebarBackgroundImageUrl,
     theme.light.loginBackgroundImageUrl, theme.dark.loginBackgroundImageUrl].filter(Boolean);
   await Promise.all(urls.map((url) => new Promise((resolve) => {
     const image = new Image(); image.onload = resolve; image.onerror = resolve; image.src = url;
@@ -125,6 +135,9 @@ export function applyBranding(settings, requestedMode) {
   const safeImage = palette.backgroundImageUrl
     ? `url("${String(palette.backgroundImageUrl).replace(/"/g, '%22')}")`
     : 'none';
+  const safeSidebarImage = palette.sidebarBackgroundImageUrl
+    ? `url("${String(palette.sidebarBackgroundImageUrl).replace(/"/g, '%22')}")`
+    : 'none';
   const tokens = {
     '--su-primary': palette.primary, '--su-secondary': palette.secondary, '--su-accent': palette.accent,
     '--su-link': palette.accent, '--su-bg': palette.bg, '--su-surface': palette.surface,
@@ -134,6 +147,13 @@ export function applyBranding(settings, requestedMode) {
     '--su-menu-hover-bg': palette.menuButtonHoverBg,
     '--su-menu-active-bg': palette.menuButtonActiveBg, '--su-menu-active-text': palette.menuButtonActiveText,
     '--su-danger': palette.danger, '--su-danger-text': palette.dangerText,
+    '--su-sidebar-bg': palette.sidebarBg, '--su-sidebar-text': palette.sidebarText,
+    '--su-sidebar-button-bg': palette.sidebarButtonBg, '--su-sidebar-button-text': palette.sidebarButtonText,
+    '--su-sidebar-button-active-bg': palette.sidebarButtonActiveBg, '--su-sidebar-button-active-text': palette.sidebarButtonActiveText,
+    '--su-sidebar-image': mode === 'reading' ? 'none' : safeSidebarImage,
+    '--su-sidebar-gradient': mode === 'reading' ? 'none' : palette.sidebarBackgroundGradient,
+    '--su-topbar-bg': palette.topbarBg, '--su-topbar-text': palette.topbarText,
+    '--su-topbar-button-bg': palette.topbarButtonBg, '--su-topbar-button-text': palette.topbarButtonText,
     '--su-page-gradient': mode === 'reading' ? '' : palette.backgroundGradient,
     '--su-page-image': mode === 'reading' ? 'none' : safeImage,
     '--su-page-overlay': mode === 'reading' ? '#00000000' : palette.backgroundOverlay,

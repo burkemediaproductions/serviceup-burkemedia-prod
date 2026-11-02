@@ -35,6 +35,7 @@ import PixelsPage from './pages/Pixels';
 import ProfilePage from './pages/Profile';
 import BrandingPage from './pages/Branding';
 import ActivityPage from './pages/Activity';
+import MyProfilePage from './pages/MyProfile';
 
 
 function RequireAuth({ children }) {
@@ -129,6 +130,7 @@ function App() {
               </RequireAuth>
             }
           />
+          <Route path="/admin/my-profile" element={<RequireAuth><AdminLayout><MyProfilePage /></AdminLayout></RequireAuth>} />
 
           <Route
             path="/admin/taxonomies"

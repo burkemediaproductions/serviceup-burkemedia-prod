@@ -26,6 +26,7 @@ const PAGE_OPTIONS = [
   { value: '/admin', label: 'Dashboard' },
   { value: '/admin/content', label: 'Content index' },
   { value: '/admin/profile', label: 'Organization Profile' },
+  { value: '/admin/my-profile', label: 'My Profile' },
   { value: '/admin/pixels', label: 'Pixels (Media Library)' },
   { value: '/admin/users', label: 'Users' },
   { value: '/admin/taxonomies', label: 'Taxonomies' },

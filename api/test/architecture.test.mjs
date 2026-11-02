@@ -153,6 +153,28 @@ test('successful ServiceUp login synchronizes Supabase Storage identity', () => 
   assert.match(app, /updateUserById\(supabaseId/);
   assert.match(seed, /updateUserById\(supabaseId/);
   assert.match(login, /supabase\.auth\.signInWithPassword/);
+  assert.match(app, /name: user\.name \|\| ''/);
+});
+test('users have a permission-free self-service My Profile page', () => {
+  const usersRoute = read('api/routes/users.js');
+  const profile = read('dashboard/src/pages/MyProfile/index.jsx');
+  const app = read('dashboard/src/App.jsx');
+  assert.match(usersRoute, /router\.get\('\/me'/);
+  assert.match(usersRoute, /router\.patch\('\/me'/);
+  assert.match(profile, /Save My Profile/);
+  assert.match(app, /\/admin\/my-profile/);
+  assert.match(read('dashboard/src/context/AuthContext.jsx'), /api\.get\('\/api\/users\/me'\)/);
+});
+test('chrome branding supports edge-to-edge topbar and sidebar appearance', () => {
+  const branding = read('dashboard/src/lib/branding.js');
+  const page = read('dashboard/src/pages/Branding/index.jsx');
+  const css = read('dashboard/src/styles/theme.css');
+  assert.match(branding, /sidebarBackgroundImageUrl/);
+  assert.match(branding, /topbarButtonBg/);
+  assert.match(page, /Sidebar CSS gradient/);
+  assert.match(page, /Top bar background/);
+  assert.match(css, /grid-template-columns: 260px 1fr/);
+  assert.match(css, /margin: 0/);
 });
 test('Panels provide template-aware page composition without frontend Widgets', () => {
   const input = read('dashboard/src/components/FieldInput.jsx');

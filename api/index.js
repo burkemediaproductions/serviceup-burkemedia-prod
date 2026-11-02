@@ -534,7 +534,7 @@ app.post('/api/auth/login', async (req, res) => {
       token,
       tenant: req.tenant,
       storageAuthReady,
-      user: { id: user.id, email: user.email, role: user.tenant_role },
+      user: { id: user.id, email: user.email, name: user.name || '', role: user.tenant_role },
     });
   } catch (err) {
     console.error('[auth/login]', err);
