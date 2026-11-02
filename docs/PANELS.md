@@ -11,6 +11,8 @@ Panels are typed website sections stored in a normal ServiceUp entry field. A Pa
 
 The starter set includes Hero, Rich Text, Image + Text, Call to Action, and Contact Intro Panels. It also includes Standard Page, Homepage, About Page, and Contact Page templates.
 
+The visual builder supports adding, duplicating, removing, and reordering Panel Types and their fields. Flexible templates use checkboxes for allowed and default Panels. Fixed templates use an ordered slot editor. Advanced JSON remains available in a collapsed section for uncommon field configuration.
+
 ## Stored value
 
 Panels stay inside `entries.data`, so existing content endpoints, permissions, revisions, exports, and tenant isolation continue to apply.

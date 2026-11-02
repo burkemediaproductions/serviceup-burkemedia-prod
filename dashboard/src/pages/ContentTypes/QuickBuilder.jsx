@@ -131,6 +131,223 @@ function JsonConfigTextarea({ value, onChange, rows = 12 }) {
   </div>;
 }
 
+function panelKey(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "");
+}
+
+function moveItem(list, index, direction) {
+  const target = index + direction;
+  if (target < 0 || target >= list.length) return list;
+  const next = [...list];
+  [next[index], next[target]] = [next[target], next[index]];
+  return next;
+}
+
+function PanelsConfigBuilder({ config, onChange }) {
+  const cfg = config && typeof config === "object" ? config : {};
+  const definitions = Array.isArray(cfg.definitions) ? cfg.definitions : [];
+  const templates = Array.isArray(cfg.templates) ? cfg.templates : [];
+  const [openPanels, setOpenPanels] = useState({});
+  const [openTemplates, setOpenTemplates] = useState({});
+
+  const save = (patch) => onChange({ ...cfg, ...patch });
+  const saveDefinitions = (next) => save({ definitions: next });
+  const saveTemplates = (next) => save({ templates: next });
+
+  function updateDefinition(index, patch) {
+    const next = [...definitions];
+    next[index] = { ...next[index], ...patch };
+    saveDefinitions(next);
+  }
+  function addDefinition() {
+    const next = [...definitions, { key: `panel_${definitions.length + 1}`, label: "New Panel", description: "", fields: [] }];
+    saveDefinitions(next);
+    setOpenPanels((prev) => ({ ...prev, [next.length - 1]: true }));
+  }
+  function removeDefinition(index) {
+    const removedKey = definitions[index]?.key;
+    onChange({ ...cfg, definitions: definitions.filter((_, i) => i !== index), templates: templates.map((template) => ({
+      ...template,
+      allowed: (template.allowed || []).filter((key) => key !== removedKey),
+      defaults: (template.defaults || []).filter((key) => key !== removedKey),
+      slots: (template.slots || []).filter((key) => key !== removedKey),
+    })) });
+  }
+  function renameDefinitionKey(index, rawKey) {
+    const oldKey = definitions[index]?.key;
+    const newKey = panelKey(rawKey);
+    const nextDefinitions = [...definitions];
+    nextDefinitions[index] = { ...nextDefinitions[index], key: newKey };
+    const replaceKey = (items) => (items || []).map((key) => key === oldKey ? newKey : key);
+    onChange({
+      ...cfg,
+      definitions: nextDefinitions,
+      templates: templates.map((template) => ({
+        ...template,
+        allowed: replaceKey(template.allowed),
+        defaults: replaceKey(template.defaults),
+        slots: replaceKey(template.slots),
+      })),
+    });
+  }
+  function updatePanelField(panelIndex, fieldIndex, patch) {
+    const fields = [...(definitions[panelIndex]?.fields || [])];
+    fields[fieldIndex] = { ...fields[fieldIndex], ...patch };
+    updateDefinition(panelIndex, { fields });
+  }
+  function addPanelField(panelIndex) {
+    const fields = [...(definitions[panelIndex]?.fields || []), {
+      field_key: `field_${(definitions[panelIndex]?.fields || []).length + 1}`,
+      label: "New field",
+      type: "text",
+      required: false,
+      help_text: "",
+      config: {},
+    }];
+    updateDefinition(panelIndex, { fields });
+  }
+
+  function updateTemplate(index, patch) {
+    const next = [...templates];
+    next[index] = { ...next[index], ...patch };
+    saveTemplates(next);
+  }
+  function addTemplate() {
+    const next = [...templates, { key: `template_${templates.length + 1}`, label: "New Page Template", description: "", fixed: false, allowed: definitions.map((d) => d.key), defaults: [] }];
+    saveTemplates(next);
+    setOpenTemplates((prev) => ({ ...prev, [next.length - 1]: true }));
+  }
+  function toggleTemplateKey(index, property, key) {
+    const current = Array.isArray(templates[index]?.[property]) ? templates[index][property] : [];
+    updateTemplate(index, { [property]: current.includes(key) ? current.filter((item) => item !== key) : [...current, key] });
+  }
+
+  return <div className="qb-panels-builder">
+    <div className="qb-panels-heading">
+      <div>
+        <h3>Panel Types</h3>
+        <p>Create the sections that can appear on a page, then add fields just like regular QuickBuilder fields.</p>
+      </div>
+      <div className="su-flex su-gap-sm su-flex-wrap">
+        <button type="button" className="su-btn" onClick={() => {
+          if ((definitions.length || templates.length) && !window.confirm("Replace the current Panel Types and Page Templates with the starter set?")) return;
+          onChange(JSON.parse(JSON.stringify(STARTER_PANEL_CONFIG)));
+        }}>Install starter set</button>
+        <button type="button" className="su-btn primary" onClick={addDefinition}>+ Add Panel Type</button>
+      </div>
+    </div>
+
+    {!definitions.length && <div className="qb-panels-empty">No Panel Types yet. Add one or install the starter set.</div>}
+    <div className="qb-panel-definitions">
+      {definitions.map((definition, panelIndex) => {
+        const open = openPanels[panelIndex] !== false;
+        return <section className="qb-panel-definition" key={`${definition.key}-${panelIndex}`}>
+          <header>
+            <button type="button" className="qb-panel-toggle" onClick={() => setOpenPanels((prev) => ({ ...prev, [panelIndex]: !open }))}>
+              <span>{open ? "▾" : "▸"}</span><strong>{definition.label || definition.key || "Untitled Panel"}</strong><code>{definition.key}</code>
+            </button>
+            <div className="su-flex su-gap-xs">
+              <button type="button" className="su-btn" disabled={panelIndex === 0} onClick={() => saveDefinitions(moveItem(definitions, panelIndex, -1))}>↑</button>
+              <button type="button" className="su-btn" disabled={panelIndex === definitions.length - 1} onClick={() => saveDefinitions(moveItem(definitions, panelIndex, 1))}>↓</button>
+              <button type="button" className="su-btn" onClick={() => {
+                const copy = JSON.parse(JSON.stringify(definition));
+                copy.key = `${definition.key || "panel"}_copy`;
+                copy.label = `${definition.label || "Panel"} Copy`;
+                const next = [...definitions]; next.splice(panelIndex + 1, 0, copy); saveDefinitions(next);
+              }}>Duplicate</button>
+              <button type="button" className="su-btn" onClick={() => removeDefinition(panelIndex)}>Remove</button>
+            </div>
+          </header>
+          {open && <div className="qb-panel-definition-body">
+            <div className="qb-panel-meta-grid">
+              <label><span>Panel name</span><input className="su-input" value={definition.label || ""} onChange={(e) => updateDefinition(panelIndex, { label: e.target.value, key: definition.key || panelKey(e.target.value) })} /></label>
+              <label><span>Technical key</span><input className="su-input" value={definition.key || ""} onChange={(e) => renameDefinitionKey(panelIndex, e.target.value)} /></label>
+              <label className="qb-panel-description"><span>Description</span><input className="su-input" value={definition.description || ""} onChange={(e) => updateDefinition(panelIndex, { description: e.target.value })} /></label>
+            </div>
+            <div className="qb-panel-fields-header"><strong>Fields</strong><button type="button" className="su-btn primary" onClick={() => addPanelField(panelIndex)}>+ Add Field</button></div>
+            {!(definition.fields || []).length && <p className="su-text-sm su-text-muted">No fields in this Panel yet.</p>}
+            <div className="qb-panel-field-list">
+              {(definition.fields || []).map((field, fieldIndex) => <div className="qb-panel-field-row" key={`${field.field_key}-${fieldIndex}`}>
+                <span className="qb-panel-field-order">{fieldIndex + 1}</span>
+                <input className="su-input" aria-label="Field label" placeholder="Label" value={field.label || ""} onChange={(e) => updatePanelField(panelIndex, fieldIndex, { label: e.target.value, field_key: field.field_key || panelKey(e.target.value) })} />
+                <input className="su-input" aria-label="Field key" placeholder="field_key" value={field.field_key || ""} onChange={(e) => updatePanelField(panelIndex, fieldIndex, { field_key: panelKey(e.target.value) })} />
+                <select className="su-select" aria-label="Field type" value={field.type || "text"} onChange={(e) => updatePanelField(panelIndex, fieldIndex, { type: e.target.value })}>
+                  {FIELD_TYPES.filter((item) => item.value !== "panels").map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
+                </select>
+                <label className="qb-panel-required"><input type="checkbox" checked={!!field.required} onChange={(e) => updatePanelField(panelIndex, fieldIndex, { required: e.target.checked })} /> Required</label>
+                <input className="su-input" aria-label="Help text" placeholder="Help text" value={field.help_text || ""} onChange={(e) => updatePanelField(panelIndex, fieldIndex, { help_text: e.target.value })} />
+                <div className="qb-panel-field-actions">
+                  <button type="button" className="su-btn" disabled={fieldIndex === 0} onClick={() => updateDefinition(panelIndex, { fields: moveItem(definition.fields || [], fieldIndex, -1) })}>↑</button>
+                  <button type="button" className="su-btn" disabled={fieldIndex === (definition.fields || []).length - 1} onClick={() => updateDefinition(panelIndex, { fields: moveItem(definition.fields || [], fieldIndex, 1) })}>↓</button>
+                  <button type="button" className="su-btn" onClick={() => {
+                    const fields = [...(definition.fields || [])];
+                    const copy = JSON.parse(JSON.stringify(field));
+                    copy.field_key = `${field.field_key || "field"}_copy`;
+                    copy.label = `${field.label || "Field"} Copy`;
+                    fields.splice(fieldIndex + 1, 0, copy);
+                    updateDefinition(panelIndex, { fields });
+                  }}>Duplicate</button>
+                  <button type="button" className="su-btn" onClick={() => updateDefinition(panelIndex, { fields: (definition.fields || []).filter((_, i) => i !== fieldIndex) })}>Remove</button>
+                </div>
+                <details className="qb-panel-field-config"><summary>Advanced field configuration</summary><JsonConfigTextarea value={field.config || {}} onChange={(fieldConfig) => updatePanelField(panelIndex, fieldIndex, { config: fieldConfig })} rows={5} /></details>
+              </div>)}
+            </div>
+          </div>}
+        </section>;
+      })}
+    </div>
+
+    <div className="qb-panels-heading qb-templates-heading">
+      <div><h3>Page Templates</h3><p>Choose which Panels each page may use. Flexible templates allow rearranging; fixed templates define exact slots.</p></div>
+      <button type="button" className="su-btn primary" onClick={addTemplate}>+ Add Page Template</button>
+    </div>
+    {!templates.length && <div className="qb-panels-empty">No Page Templates yet.</div>}
+    <div className="qb-panel-definitions">
+      {templates.map((template, templateIndex) => {
+        const open = openTemplates[templateIndex] !== false;
+        return <section className="qb-panel-definition" key={`${template.key}-${templateIndex}`}>
+          <header>
+            <button type="button" className="qb-panel-toggle" onClick={() => setOpenTemplates((prev) => ({ ...prev, [templateIndex]: !open }))}>
+              <span>{open ? "▾" : "▸"}</span><strong>{template.label || template.key || "Untitled Template"}</strong><code>{template.fixed ? "Fixed" : "Flexible"}</code>
+            </button>
+            <div className="su-flex su-gap-xs">
+              <button type="button" className="su-btn" disabled={templateIndex === 0} onClick={() => saveTemplates(moveItem(templates, templateIndex, -1))}>↑</button>
+              <button type="button" className="su-btn" disabled={templateIndex === templates.length - 1} onClick={() => saveTemplates(moveItem(templates, templateIndex, 1))}>↓</button>
+              <button type="button" className="su-btn" onClick={() => saveTemplates(templates.filter((_, i) => i !== templateIndex))}>Remove</button>
+            </div>
+          </header>
+          {open && <div className="qb-panel-definition-body">
+            <div className="qb-panel-meta-grid">
+              <label><span>Template name</span><input className="su-input" value={template.label || ""} onChange={(e) => updateTemplate(templateIndex, { label: e.target.value, key: template.key || panelKey(e.target.value) })} /></label>
+              <label><span>Technical key</span><input className="su-input" value={template.key || ""} onChange={(e) => updateTemplate(templateIndex, { key: panelKey(e.target.value) })} /></label>
+              <label className="qb-panel-description"><span>Description</span><input className="su-input" value={template.description || ""} onChange={(e) => updateTemplate(templateIndex, { description: e.target.value })} /></label>
+            </div>
+            <label className="qb-template-fixed"><input type="checkbox" checked={!!template.fixed} onChange={(e) => updateTemplate(templateIndex, { fixed: e.target.checked, slots: e.target.checked ? (template.slots || []) : template.slots })} /> Lock this template to a fixed Panel structure</label>
+            {!template.fixed ? <div className="qb-template-options">
+              <div><strong>Allowed Panels</strong><p>Select what editors can add to pages using this template.</p>{definitions.map((definition) => <label key={definition.key}><input type="checkbox" checked={(template.allowed || []).includes(definition.key)} onChange={() => toggleTemplateKey(templateIndex, "allowed", definition.key)} /> {definition.label || definition.key}</label>)}</div>
+              <div><strong>Default Panels</strong><p>These are added automatically to a new empty page.</p>{definitions.filter((definition) => (template.allowed || []).includes(definition.key)).map((definition) => <label key={definition.key}><input type="checkbox" checked={(template.defaults || []).includes(definition.key)} onChange={() => toggleTemplateKey(templateIndex, "defaults", definition.key)} /> {definition.label || definition.key}</label>)}</div>
+            </div> : <div className="qb-template-slots">
+              <div className="qb-panel-fields-header"><div><strong>Fixed Panel slots</strong><p>Editors can change content but cannot add, remove, or reorder these slots.</p></div><button type="button" className="su-btn primary" disabled={!definitions.length} onClick={() => updateTemplate(templateIndex, { slots: [...(template.slots || []), definitions[0]?.key] })}>+ Add Slot</button></div>
+              {(template.slots || []).map((slot, slotIndex) => <div className="qb-template-slot" key={`${slot}-${slotIndex}`}><span>{slotIndex + 1}</span><select className="su-select" value={slot} onChange={(e) => { const slots = [...(template.slots || [])]; slots[slotIndex] = e.target.value; updateTemplate(templateIndex, { slots }); }}>{definitions.map((definition) => <option key={definition.key} value={definition.key}>{definition.label || definition.key}</option>)}</select><button type="button" className="su-btn" disabled={slotIndex === 0} onClick={() => updateTemplate(templateIndex, { slots: moveItem(template.slots || [], slotIndex, -1) })}>↑</button><button type="button" className="su-btn" disabled={slotIndex === (template.slots || []).length - 1} onClick={() => updateTemplate(templateIndex, { slots: moveItem(template.slots || [], slotIndex, 1) })}>↓</button><button type="button" className="su-btn" onClick={() => updateTemplate(templateIndex, { slots: (template.slots || []).filter((_, i) => i !== slotIndex) })}>Remove</button></div>)}
+            </div>}
+          </div>}
+        </section>;
+      })}
+    </div>
+
+    <details className="qb-panels-advanced">
+      <summary>Advanced JSON</summary>
+      <p>Use this only for configuration that is not yet exposed in the visual builder.</p>
+      <label><strong>Panel definitions</strong><JsonConfigTextarea value={definitions} onChange={(next) => saveDefinitions(next)} rows={14} /></label>
+      <label><strong>Page templates</strong><JsonConfigTextarea value={templates} onChange={(next) => saveTemplates(next)} rows={10} /></label>
+    </details>
+  </div>;
+}
+
 // === SUBFIELDS SUPPORT (name/address/media) ===
 const SUBFIELD_MAP = {
   name: {
@@ -1176,24 +1393,11 @@ export default function QuickBuilderPage() {
                 Panels are typed website sections. Templates determine which Panels an entry may use and whether their order is flexible or fixed.
               </p>
             </div>
-            <button type="button" className="su-btn primary" onClick={() => onChange({ ...STARTER_PANEL_CONFIG })}>
-              Install starter Panels + templates
-            </button>
             <label className="space-y-1 block">
               <span className="font-medium text-xs">Add button label</span>
               <input className="su-input" value={cfg.addLabel || "Add Panel"} onChange={(e) => updateCfg({ addLabel: e.target.value })} />
             </label>
-            <div>
-              <div className="font-medium text-xs mb-1">Panel definitions</div>
-              <JsonConfigTextarea value={cfg.definitions || []} onChange={(definitions) => updateCfg({ definitions })} rows={18} />
-            </div>
-            <div>
-              <div className="font-medium text-xs mb-1">Page templates</div>
-              <JsonConfigTextarea value={cfg.templates || []} onChange={(templates) => updateCfg({ templates })} rows={12} />
-              <p className="text-[11px] text-gray-500">
-                A fixed template may use <code>slots</code>; a flexible template may use <code>defaults</code> and <code>allowed</code> Panel keys.
-              </p>
-            </div>
+            <PanelsConfigBuilder config={cfg} onChange={onChange} />
           </div>
         )}
 

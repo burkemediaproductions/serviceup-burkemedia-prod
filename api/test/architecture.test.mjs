@@ -105,6 +105,10 @@ test('Panels provide template-aware page composition without frontend Widgets', 
   assert.match(input, /function PanelsField/);
   assert.match(input, /Page template/);
   assert.match(builder, /Panels \(page sections\)/);
+  assert.match(builder, /function PanelsConfigBuilder/);
+  assert.match(builder, /\+ Add Panel Type/);
+  assert.match(builder, /\+ Add Page Template/);
+  assert.match(builder, /Advanced JSON/);
   const pageType = website.content_types.find((item) => item.slug === 'page');
   assert.equal(pageType.fields.some((field) => field.type === 'panels'), true);
 });
