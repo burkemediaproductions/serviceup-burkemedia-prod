@@ -5,6 +5,7 @@ import FieldInput, { PanelsPreview } from "../../components/FieldInput";
 import LoadingPanel from "../../components/LoadingPanel";
 import RichTextContent, { isRichTextDocument } from "../../components/RichTextContent";
 import { useSettings } from "../../context/SettingsContext";
+import { useAuth } from "../../context/AuthContext";
 
 // Simple slug helper
 function slugify(value) {
@@ -27,40 +28,6 @@ function normalizeConfig(cfg) {
     }
   }
   return {};
-}
-
-function getRoleFromToken() {
-  try {
-    const token =
-      window.localStorage.getItem("token") ||
-      window.localStorage.getItem("serviceup_token") ||
-      window.localStorage.getItem("jwt") ||
-      window.localStorage.getItem("authToken");
-
-    if (!token) return null;
-
-    const parts = String(token).split(".");
-    if (parts.length < 2) return null;
-
-    const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const json = decodeURIComponent(
-      atob(b64)
-        .split("")
-        .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
-        .join("")
-    );
-
-    const payload = JSON.parse(json);
-    return (
-      payload?.role ||
-      payload?.user?.role ||
-      payload?.claims?.role ||
-      payload?.app_metadata?.role ||
-      null
-    );
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -286,6 +253,7 @@ function deriveTitleFromTemplate(template, data) {
 
 export default function Editor() {
   const { settings } = useSettings();
+  const { user } = useAuth();
   const { typeSlug, entryId } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -304,10 +272,7 @@ export default function Editor() {
 
 
 
-  const roleUpper = useMemo(() => {
-    const r = getRoleFromToken();
-    return String(r || "VIEWER").toUpperCase();
-  }, []);
+  const roleUpper = String(user?.role || "VIEWER").toUpperCase();
 
   const isNew = !entryId || entryId === "new";
 

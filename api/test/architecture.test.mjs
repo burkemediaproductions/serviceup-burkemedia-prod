@@ -123,6 +123,8 @@ test('dashboard polish includes branded chrome, reorderable navigation, and stab
   assert.match(read('dashboard/src/pages/Settings/EntryViews.jsx'), /Toggle preview/);
   assert.match(editor, /coreCfg\.layout !== "toggle" \|\| previewOpen/);
   assert.match(editor, /su-entry-json/);
+  assert.match(editor, /const \{ user \} = useAuth\(\)/);
+  assert.match(editor, /String\(user\?\.role \|\| "VIEWER"\)\.toUpperCase\(\)/);
   assert.match(settings, /Branding & Appearance/);
   assert.match(settings, /Show JSON for/);
   assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /const canCustomize = currentRole === "ADMIN"/);
