@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 
 // ✅ NEW: list/widget display helper (handles repeaters, nested repeaters, etc.)
 import { formatFieldValueForList } from '../../components/FieldInput';
+import { isRichTextDocument, richTextToPlainText } from '../../components/RichTextContent';
 
 
 // ---------------------------------------------------------------------------
@@ -185,7 +186,8 @@ export default function TypeList() {
   const roleUpper = role.toUpperCase();
 
   // 🔔 listen for global “list views changed” bumps
-  const { listViewsVersion } = useSettings();
+  const { listViewsVersion, settings } = useSettings();
+  const hideJson = !!settings?.hideJsonByRole?.[roleUpper];
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -471,6 +473,10 @@ export default function TypeList() {
 
     if (value === null || typeof value === 'undefined') return '';
 
+    if (isRichTextDocument(value)) {
+      return <span className="su-rich-list-excerpt">{richTextToPlainText(value, 180)}</span>;
+    }
+
     // ✅ NEW: If this key maps to an actual field definition, use the canonical
     // formatter (repeaters, nested repeaters, relations, etc.) for list/widget display.
     if (Array.isArray(contentType?.fields)) {
@@ -710,7 +716,7 @@ export default function TypeList() {
         </div>
       </div>
 
-      <div className="su-card su-mt-lg">
+      {!hideJson && <div className="su-card su-mt-lg">
         <div className="su-card-header">
           <h2 className="su-card-title">Debug</h2>
         </div>
@@ -737,7 +743,7 @@ export default function TypeList() {
             )}
           </pre>
         </div>
-      </div>
+      </div>}
     </div>
   );
 }

@@ -197,6 +197,17 @@ button {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.su-entry-layout-stacked { grid-template-columns: minmax(0, 1fr); }
+.su-entry-core-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.su-preview-value { min-width: 0; overflow-wrap: anywhere; }
+.su-rich-list-excerpt { display: block; max-width: 42rem; line-height: 1.45; overflow-wrap: anywhere; }
+.su-table { table-layout: auto; width: 100%; }
+.su-table td { max-width: 42rem; overflow-wrap: anywhere; word-break: break-word; }
+
+@media (max-width: 800px) {
+  .su-entry-core-row { grid-template-columns: 1fr; }
+}
+
 /* Navigation elements */
 .su-nav-header {
   font-weight: 700;

@@ -2748,7 +2748,7 @@ export default function FieldInput({
 
   // ---- Advanced ----
   if (fieldType === "rich_text") {
-    return <RichTextEditor value={value} onChange={onChange} options={{ headings: [1, 2, 3, 4] }} />;
+    return <RichTextEditor value={value} onChange={onChange} options={{ headings: [1, 2, 3, 4], large: !!field?.editor_large }} />;
   }
 
   if (fieldType === "time") {

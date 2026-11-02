@@ -52,6 +52,8 @@ const EMPTY_CORE = {
   hideSlug: false,
   hideStatus: false,
   hidePreview: false,
+  layout: "split",
+  richTextLarge: false,
 
   // if true, and slug is empty, Editor can auto-fill slug from derived/manual title
   autoSlugFromTitleIfEmpty: true,
@@ -1177,6 +1179,33 @@ if (newly) loadViewForEdit(newly);
                         }}
                       />
                       Hide Preview panel
+                    </label>
+
+                    <div>
+                      <label className="su-form-label">Editor layout</label>
+                      <select
+                        className="su-select"
+                        value={core.layout || "split"}
+                        onChange={(e) => {
+                          setCore((prev) => ({ ...prev, layout: e.target.value }));
+                          setDirty(true);
+                        }}
+                      >
+                        <option value="split">Fields and preview side by side</option>
+                        <option value="stacked">Writing layout: fields above preview</option>
+                      </select>
+                    </div>
+
+                    <label className="su-chip su-items-center su-gap-xs">
+                      <input
+                        type="checkbox"
+                        checked={!!core.richTextLarge}
+                        onChange={(e) => {
+                          setCore((prev) => ({ ...prev, richTextLarge: e.target.checked }));
+                          setDirty(true);
+                        }}
+                      />
+                      Use a larger rich-text writing area
                     </label>
 
                     <label className="su-chip su-items-center su-gap-xs md:col-span-2">

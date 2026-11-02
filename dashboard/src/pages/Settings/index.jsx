@@ -424,6 +424,27 @@ export default function SettingsPage() {
             </div>
           </section>
           <section className="su-card">
+            <h2 className="su-card-title">Technical information</h2>
+            <p className="text-xs text-gray-500 mb-3">
+              Hide raw JSON and debug panels for roles that do not need developer details.
+            </p>
+            <div className="space-y-2">
+              {Array.from(new Set(['ADMIN', 'EDITOR', 'VIEWER', ...roleOptions.map((r) => String(r.value || '').toUpperCase())])).map((roleName) => (
+                <label key={roleName} className="su-chip su-items-center su-gap-xs">
+                  <input
+                    type="checkbox"
+                    checked={!!form.hideJsonByRole?.[roleName]}
+                    onChange={(e) => setForm((prev) => ({
+                      ...prev,
+                      hideJsonByRole: { ...(prev.hideJsonByRole || {}), [roleName]: e.target.checked },
+                    }))}
+                  />
+                  Hide JSON for {roleName}
+                </label>
+              ))}
+            </div>
+          </section>
+          <section className="su-card">
             <h2 className="su-card-title">Branding</h2>
             <div className="space-y-3">
               <div>

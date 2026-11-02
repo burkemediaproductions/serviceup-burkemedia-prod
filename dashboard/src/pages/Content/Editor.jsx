@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { api } from "../../lib/api";
 import FieldInput from "../../components/FieldInput";
+import RichTextContent, { isRichTextDocument } from "../../components/RichTextContent";
+import { useSettings } from "../../context/SettingsContext";
 
 // Simple slug helper
 function slugify(value) {
@@ -282,6 +284,7 @@ function deriveTitleFromTemplate(template, data) {
 }
 
 export default function Editor() {
+  const { settings } = useSettings();
   const { typeSlug, entryId } = useParams();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -353,6 +356,8 @@ export default function Editor() {
       hideSlug: !!c.hideSlug,
       hideStatus: !!c.hideStatus,
       hidePreview: !!c.hidePreview,
+      layout: c.layout === "stacked" ? "stacked" : "split",
+      richTextLarge: !!c.richTextLarge,
       autoSlugFromTitleIfEmpty: c.autoSlugFromTitleIfEmpty !== false,
     };
   }, [editorViewConfig]);
@@ -894,11 +899,13 @@ export default function Editor() {
     return prettyValue(v);
   }
 
+  const hideJson = !!settings?.hideJsonByRole?.[roleUpper];
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <div className="su-grid cols-2">
+    <div className={`su-grid ${coreCfg.layout === "stacked" ? "su-entry-layout-stacked" : "cols-2"}`}>
       {/* LEFT: Editor card */}
       <div className="su-card">
         <h2 style={{ marginTop: 0, marginBottom: 12 }}>
@@ -972,7 +979,7 @@ export default function Editor() {
 
         <form onSubmit={handleSave}>
           {/* Core fields */}
-          <div style={{ display: "grid", gap: 12, marginBottom: 20 }}>
+          <div className={coreCfg.layout === "stacked" ? "su-entry-core-row" : ""} style={{ display: "grid", gap: 12, marginBottom: 20 }}>
             {!coreCfg.hideTitle && (
               <label style={{ fontSize: 13 }}>
                 {coreCfg.titleLabel || "Title"}
@@ -1074,7 +1081,7 @@ export default function Editor() {
                           </label>
 
                           <FieldInput
-                            field={def}
+                            field={{ ...def, editor_large: coreCfg.richTextLarge }}
                             value={value}
                             onChange={(val) => {
                               if (!key) return;
@@ -1165,16 +1172,19 @@ export default function Editor() {
                   }}
                 >
                   <div style={{ opacity: 0.7 }}>{k}</div>
-                  <div>{prettyValueForField(k, v)}</div>
+                  <div className="su-preview-value">
+                    {isRichTextDocument(v) ? <RichTextContent value={v} /> : prettyValueForField(k, v)}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          <h3 style={{ marginTop: 0, marginBottom: 8, fontSize: 14 }}>
-            Raw JSON (<code>entries.data</code>)
-          </h3>
-          <pre
+          {!hideJson && <>
+            <h3 style={{ marginTop: 0, marginBottom: 8, fontSize: 14 }}>
+              Raw JSON (<code>entries.data</code>)
+            </h3>
+            <pre
             style={{
               fontSize: 11,
               background: "#0b1120",
@@ -1186,9 +1196,10 @@ export default function Editor() {
               fontFamily:
                 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
             }}
-          >
-            {JSON.stringify(previewData, null, 2)}
-          </pre>
+            >
+              {JSON.stringify(previewData, null, 2)}
+            </pre>
+          </>}
         </div>
       )}
     </div>

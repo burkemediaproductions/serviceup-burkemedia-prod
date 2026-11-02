@@ -47,6 +47,11 @@ export function SettingsProvider({ children }) {
             EDITOR: false,
             ADMIN: false,
           },
+          hideJsonByRole: {
+            VIEWER: true,
+            EDITOR: true,
+            ADMIN: false,
+          },
         };
 
         setSettings(fallback);
