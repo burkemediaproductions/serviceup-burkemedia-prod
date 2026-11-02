@@ -814,6 +814,10 @@ button {
 .su-user-name-editor { display: grid; gap: 8px; min-width: 220px; }
 .su-user-name-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .su-user-name-actions .su-btn { min-width: 82px; font-size: 12px; padding: 7px 12px; }
+.su-user-main-row td { vertical-align: top; padding-bottom: 5px; }
+.su-user-main-row td:last-child { padding-left: 14px; }
+.su-user-action-row td { padding-top: 0; padding-bottom: 18px; border-bottom: 1px solid color-mix(in srgb, var(--su-border) 72%, transparent); }
+.su-user-action-row:last-child td { border-bottom: 0; }
 
 /* Small compatibility layer for the Settings screen's layout utilities. */
 .flex { display: flex; }

@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from "react";
 import { useDashboard } from "../../hooks/useDashboard";
 import { useAuth } from "../../context/AuthContext";
+import { useSettings } from "../../context/SettingsContext";
 
 // Basic library of widget "types" the builder can create
 const WIDGET_LIBRARY = [
@@ -24,7 +25,7 @@ const WIDGET_LIBRARY = [
     description:
       "Free-form HTML content: announcements, instructions, embedded iframes, etc.",
     defaultConfig: {
-      html: "<p>Hello, <strong>{{name}}</strong>!</p><p>Today is {{date}}.</p>",
+      html: "<p>Edit this HTML block to add announcements or instructions.</p>",
     },
     roles: ["ADMIN", "EDITOR"],
   },
@@ -61,6 +62,7 @@ function getCurrentRole() {
 
 export default function DashboardPage() {
   const { user } = useAuth();
+  const { settings } = useSettings();
   const {
     widgets,
     loading,
@@ -78,12 +80,18 @@ export default function DashboardPage() {
 
   const currentRole = getCurrentRole();
   const canCustomize = currentRole === "ADMIN";
+  const fullName = String(user?.name || '').trim();
+  const nameParts = fullName.split(/\s+/).filter(Boolean);
+  const userName = String(user?.email || 'there').split('@')[0];
   const greetingValues = {
-    name: user?.name || String(user?.email || 'there').split('@')[0],
+    name: fullName || userName,
+    name_first: nameParts[0] || userName,
+    name_last: nameParts.length > 1 ? nameParts[nameParts.length - 1] : '',
+    user_name: userName,
     date: new Intl.DateTimeFormat(undefined, { dateStyle: 'full' }).format(new Date()),
   };
   const renderTemplate = (value, html = false) => String(value || '')
-    .replace(/\{\{\s*(name|date)\s*\}\}/gi, (_, key) => html ? escapeHtml(greetingValues[key.toLowerCase()]) : greetingValues[key.toLowerCase()]);
+    .replace(/\{\{\s*(name|name_first|name_last|user_name|date)\s*\}\}/gi, (_, key) => html ? escapeHtml(greetingValues[key.toLowerCase()]) : greetingValues[key.toLowerCase()]);
 
   // Only show widgets allowed for the current role
   const visibleWidgets = useMemo(
@@ -152,7 +160,7 @@ export default function DashboardPage() {
         </div>
 
         {editingId === id && draft && type === 'html-block' && (
-          <p className="su-help">Personalize the title or message with <code>{'{{name}}'}</code> and <code>{'{{date}}'}</code>.</p>
+          <p className="su-help">Optional tokens: <code>{'{{name}}'}</code>, <code>{'{{name_first}}'}</code>, <code>{'{{name_last}}'}</code>, <code>{'{{user_name}}'}</code>, and <code>{'{{date}}'}</code>.</p>
         )}
 
         {editingId === id && draft && <div className="su-card--soft" style={{padding:12,marginBottom:12}}><label className="su-label">Widget title<input className="su-input" value={draft.title || ''} onChange={(e)=>setDraft({...draft,title:e.target.value})}/></label>{type === 'html-block' && <label className="su-label">HTML content<textarea className="su-input" rows="5" value={draft.config?.html || ''} onChange={(e)=>setDraft({...draft,config:{...draft.config,html:e.target.value}})}/></label>}{type === 'quick-links' && <div><strong>Quick links</strong>{(draft.config?.links||[]).map((link,index)=><div key={link.id||index} style={{display:'grid',gridTemplateColumns:'1fr 1fr auto',gap:8}}><input className="su-input" value={link.label||''} onChange={(e)=>setDraft({...draft,config:{...draft.config,links:draft.config.links.map((x,i)=>i===index?{...x,label:e.target.value}:x)}})}/><input className="su-input" value={link.href||''} onChange={(e)=>setDraft({...draft,config:{...draft.config,links:draft.config.links.map((x,i)=>i===index?{...x,href:e.target.value}:x)}})}/><button className="su-btn danger" onClick={()=>setDraft({...draft,config:{...draft.config,links:draft.config.links.filter((_,i)=>i!==index)}})}>Remove</button></div>)}<button className="su-btn" onClick={()=>setDraft({...draft,config:{...draft.config,links:[...(draft.config?.links||[]),{id:`link-${Date.now()}`,label:'New link',href:'/'}]}})}>+ Add link</button></div>}<div style={{display:'flex',gap:8,marginTop:10}}><button className="su-btn primary" onClick={()=>{updateWidget(id,{title:draft.title,config:draft.config});setEditingId(null);setDraft(null)}}>Save Widget</button><button className="su-btn" onClick={()=>{setEditingId(null);setDraft(null)}}>Cancel</button></div></div>}
@@ -218,9 +226,7 @@ export default function DashboardPage() {
         <div>
           <h1 className="su-page-title">Dashboard</h1>
           <p className="su-page-subtitle">
-            {canCustomize
-              ? <>Role: <strong>{currentRole}</strong>. Customize widgets for each role using the builder below.</>
-              : <>Your dashboard.</>}
+            {renderTemplate(settings?.dashboardMessage || 'Your dashboard.')}
           </p>
         </div>
         <div className="su-page-header__actions">

@@ -286,7 +286,8 @@ export default function UsersPage() {
                   const nameSaving = !!nameSavingById[u.id];
 
                   return (
-                    <tr key={u.id}>
+                    <React.Fragment key={u.id}>
+                    <tr className="su-user-main-row">
                       <td>{u.email}</td>
 
                       {/* ✅ Editable Name column */}
@@ -310,26 +311,6 @@ export default function UsersPage() {
                             style={{ minWidth: 180 }}
                           />
 
-                          <div className="su-user-name-actions">
-                            <button
-                              type="button"
-                              className="su-btn primary"
-                              disabled={!dirty || nameSaving}
-                              onClick={() => saveName(u)}
-                            >
-                              {nameSaving ? 'Saving…' : 'Save'}
-                            </button>
-
-                            {dirty && !nameSaving && (
-                              <button
-                                type="button"
-                                className="su-btn"
-                                onClick={() => cancelNameEdit(u)}
-                              >
-                                Cancel
-                              </button>
-                            )}
-                          </div>
                         </div>
                       </td>
 
@@ -365,6 +346,27 @@ export default function UsersPage() {
                         </button>
                       </td>
                     </tr>
+                    <tr className="su-user-action-row">
+                      <td aria-hidden="true" />
+                      <td colSpan={3}>
+                        <div className="su-user-name-actions">
+                          <button
+                            type="button"
+                            className="su-btn primary"
+                            disabled={!dirty || nameSaving}
+                            onClick={() => saveName(u)}
+                          >
+                            {nameSaving ? 'Saving…' : 'Save name'}
+                          </button>
+                          {dirty && !nameSaving && (
+                            <button type="button" className="su-btn" onClick={() => cancelNameEdit(u)}>
+                              Cancel
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                    </React.Fragment>
                   );
                 })}
 

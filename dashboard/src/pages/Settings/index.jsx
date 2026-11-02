@@ -440,6 +440,16 @@ export default function SettingsPage() {
                 />
               </div>
               <div>
+                <label className="su-label">Dashboard message</label>
+                <input
+                  className="su-input"
+                  value={form.dashboardMessage || ''}
+                  onChange={bind('dashboardMessage')}
+                  placeholder="Your dashboard."
+                />
+                <p className="su-help">Optional tokens: {'{{name}}'}, {'{{name_first}}'}, {'{{name_last}}'}, {'{{user_name}}'}, and {'{{date}}'}.</p>
+              </div>
+              <div>
                 <label className="su-label">Theme</label>
                 <select
                   className="su-select"

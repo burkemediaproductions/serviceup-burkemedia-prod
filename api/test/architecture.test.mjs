@@ -131,6 +131,10 @@ test('dashboard polish includes branded chrome, reorderable navigation, and stab
   assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /canCustomize && <section className="su-dashboard-add"/);
   assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /\{\{name\}\}/);
   assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /\{\{date\}\}/);
+  assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /name_first/);
+  assert.match(read('dashboard/src/pages/Dashboards/index.jsx'), /user_name/);
+  assert.match(settings, /Dashboard message/);
+  assert.match(read('dashboard/src/hooks/useDashboard.js'), /Welcome to ServiceUp/);
   assert.match(editor, /Back to editor/);
   assert.match(editor, /Preview entry/);
   assert.match(read('dashboard/src/pages/Users/index.jsx'), /su-user-name-actions/);
